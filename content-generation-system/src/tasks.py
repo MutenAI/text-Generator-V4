@@ -8,6 +8,7 @@ class WorkflowManager:
         """Inizializza il workflow manager."""
         self.agents = agents
         self.logger = logger or logging.getLogger(__name__)
+        self.adherence_check_enabled = True  # Flag per abilitare/disabilitare il controllo di aderenza
 
     def create_tasks(self, topic, content_type="article"):
         """Crea la sequenza di task appropriata in base al tipo di contenuto."""
@@ -26,7 +27,7 @@ class WorkflowManager:
             agent=self.agents["web_searcher"],  # Utilizziamo il web_searcher che può fare anche l'outline
             async_execution=False
         )
-        
+
         # Task 2: Content Creation + Initial Editing
         writing_editing_task = Task(
             description=f"Create and optimize an article on '{topic}' following these steps:\n\n1. Write an engaging and informative article of 800-1000 words based on the provided research and outline.\n2. Follow the structure with introduction, 2-3 main sections (200-300 words each), and conclusion.\n3. Apply best practices for writing style:\n   - Use a professional yet conversational tone\n   - Ensure active voice and proper sentence structure\n   - Maintain logical flow with clear headings and subheadings\n   - Make content accessible and interesting for the target audience\n\nYour output should be a well-structured and polished article ready for final review.",
@@ -35,7 +36,7 @@ class WorkflowManager:
             async_execution=False,
             dependencies=[research_outline_task]
         )
-        
+
         # Task 3: Final Review + Optimization
         review_finalize_task = Task(
             description=f"Review and finalize the article about '{topic}' following these steps:\n\n1. Use the MarkdownParserTool to extract brand guidelines from the reference file.\n2. Review and optimize the content based on:\n   - Factual accuracy against the research summary\n   - Alignment with brand voice and style guidelines\n   - Content structure and logical flow\n   - Quality and engagement level\n   - Technical accuracy\n3. Make all necessary improvements and generate the final output:\n   - Apply corrections for any inaccuracies\n   - Enhance flow and transitions where needed\n   - Adjust tone and style to match brand guidelines\n   - Ensure the article maintains its target length (800-1000 words)\n   - Format according to markdown standards\n\nThe final output should be the complete, publication-ready article.",
@@ -45,8 +46,19 @@ class WorkflowManager:
             dependencies=[writing_editing_task],
             tools=[self.agents["editor"].tools[0]]  # Assicuriamo che lo strumento markdown sia disponibile
         )
-        
-        return [research_outline_task, writing_editing_task, review_finalize_task]
+
+        tasks = [research_outline_task, writing_editing_task]
+        if self.adherence_check_enabled and self._check_guideline_adherence(writing_editing_task.expected_output):
+            self.logger.info("Guideline adherence sufficient; skipping final review.")
+        else:
+            tasks.append(review_finalize_task)
+        return tasks
+
+    def _check_guideline_adherence(self, content):
+        # Placeholder for a real guideline adherence check
+        # In a real application, this would involve comparing the content against a set of guidelines.
+        return len(content) > 500 #Simulate:  If more than 500 characters, assume adherence
+
 
     def _create_extended_article_workflow(self, topic):
         """Crea il flusso di lavoro per articoli lunghi (1500+ parole)."""
@@ -57,7 +69,7 @@ class WorkflowManager:
             agent=self.agents["web_searcher"],
             async_execution=False
         )
-        
+
         # Task 2: Content Architecture
         architecture_task = Task(
             description=f"Design a detailed structure for a 1500-word article on '{topic}'. Create a JSON structure that specifies: title, target_word_count (1500), and sections array with title, target_words, key_points, and subsections for each section. Ensure logical flow and comprehensive coverage.",
@@ -103,7 +115,7 @@ class WorkflowManager:
             async_execution=False,
             dependencies=[editing_task]
         )
-        
+
         return [research_task, architecture_task] + section_tasks + [editing_task, review_task]
 
     def _create_extended_workflow(self, topic):

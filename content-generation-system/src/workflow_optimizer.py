@@ -136,7 +136,9 @@ class WorkflowOptimizer:
             # Revisione e finalizzazione possono essere uniti
             ("review", "finalize"),
             # Ottimizzazione e finalizzazione possono essere uniti
-            ("optimize", "finalize")
+            ("optimize", "finalize"),
+            # Review ed edit possono essere uniti (nuovo)
+            ("review", "edit")
         ]
         
         task1 = step1.get("task", "")
@@ -310,6 +312,66 @@ class WorkflowOptimizer:
         Returns:
             Risultato dell'elaborazione
         """
+
+    def check_guidelines_adherence(self, content: str, guidelines: str, threshold: float = 0.85) -> bool:
+        """Verifica se il contenuto è già aderente alle linee guida.
+        
+        Args:
+            content: Contenuto da verificare
+            guidelines: Linee guida da rispettare
+            threshold: Soglia di aderenza (da 0 a 1)
+            
+        Returns:
+            True se il contenuto è già aderente alle linee guida, False altrimenti
+        """
+        # Implementazione semplificata che può essere migliorata con NLP più avanzato
+        if not content or not guidelines:
+            return False
+            
+        # Estrai i punti chiave dalle linee guida
+        key_points = self._extract_key_points(guidelines)
+        
+        # Verifica quanti punti chiave sono presenti nel contenuto
+        matches = 0
+        for point in key_points:
+            if point.lower() in content.lower():
+                matches += 1
+                
+        # Calcola la percentuale di aderenza
+        adherence_score = matches / max(1, len(key_points))
+        
+        self.logger.info(f"Aderenza alle linee guida: {adherence_score:.2f} ({matches}/{len(key_points)} punti)")
+        
+        return adherence_score >= threshold
+    
+    def _extract_key_points(self, guidelines: str) -> List[str]:
+        """Estrae i punti chiave dalle linee guida.
+        
+        Args:
+            guidelines: Linee guida
+            
+        Returns:
+            Lista di punti chiave
+        """
+        # Questa è una versione semplificata che può essere migliorata
+        # Estrae elementi da elenchi puntati e titoli
+        key_points = []
+        
+        # Estrai i titoli (## Heading)
+        import re
+        headings = re.findall(r'##\s+(.+?)$', guidelines, re.MULTILINE)
+        key_points.extend(headings)
+        
+        # Estrai elementi puntati (- Item o * Item)
+        bullet_points = re.findall(r'[-*]\s+(.+?)$', guidelines, re.MULTILINE)
+        key_points.extend(bullet_points)
+        
+        # Estrai elementi in grassetto (**Item**)
+        bold_items = re.findall(r'\*\*(.+?)\*\*', guidelines)
+        key_points.extend(bold_items)
+        
+        return key_points
+
         # Verifica se il contenuto è troppo lungo per il modello
         content_tokens = self.token_manager.count_tokens(content, model)
         model_limit = self.token_manager.get_model_token_limit(model)
