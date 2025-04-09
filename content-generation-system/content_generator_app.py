@@ -262,6 +262,9 @@ if generate_button:
 
                 st.write(f"✅ Creati {len(tasks)} task per il workflow")
 
+                # Definisci se usare elaborazione parallela
+                use_parallel = False  # Impostato a False di default per maggiore stabilità
+
                 # Crea il crew
                 crew_config = {
                     'agents': list(agents.values()),
