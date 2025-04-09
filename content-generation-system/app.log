@@ -1,0 +1,48 @@
+2025-04-08 00:29:00,758 - content_generator_app - ERROR - Errore nel caricamento della configurazione: Campo richiesto mancante: serper_api_key
+2025-04-08 00:29:00,759 - content_generator_app - ERROR - Error during content generation: Campo richiesto mancante: serper_api_key
+Traceback (most recent call last):
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/content_generator_app.py", line 134, in <module>
+    config = config_manager.load_config(config_path=config_file)
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/config_manager.py", line 51, in load_config
+    raise ValueError(f"Campo richiesto mancante: {field}")
+ValueError: Campo richiesto mancante: serper_api_key
+2025-04-08 00:38:46,821 - content_generator_app - ERROR - Errore nel caricamento della configurazione: SERPER_API_KEY mancante nel file .env
+2025-04-08 00:38:46,822 - content_generator_app - ERROR - Error during content generation: SERPER_API_KEY mancante nel file .env
+Traceback (most recent call last):
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/content_generator_app.py", line 134, in <module>
+    config = config_manager.load_config(config_path=config_file)
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/config_manager.py", line 56, in load_config
+    raise ValueError("SERPER_API_KEY mancante nel file .env")
+ValueError: SERPER_API_KEY mancante nel file .env
+2025-04-08 00:49:50,589 - content_generator_app - ERROR - Errore nel caricamento della configurazione: SERPER_API_KEY mancante nel file .env
+2025-04-08 00:49:50,590 - content_generator_app - ERROR - Error during content generation: SERPER_API_KEY mancante nel file .env
+Traceback (most recent call last):
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/content_generator_app.py", line 134, in <module>
+    config = config_manager.load_config(config_path=config_file)
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/config_manager.py", line 56, in load_config
+    raise ValueError("SERPER_API_KEY mancante nel file .env")
+ValueError: SERPER_API_KEY mancante nel file .env
+2025-04-08 00:49:51,738 - content_generator_app - ERROR - Errore nel caricamento della configurazione: SERPER_API_KEY mancante nel file .env
+2025-04-08 00:49:51,738 - content_generator_app - ERROR - Error during content generation: SERPER_API_KEY mancante nel file .env
+Traceback (most recent call last):
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/content_generator_app.py", line 134, in <module>
+    config = config_manager.load_config(config_path=config_file)
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/config_manager.py", line 56, in load_config
+    raise ValueError("SERPER_API_KEY mancante nel file .env")
+ValueError: SERPER_API_KEY mancante nel file .env
+2025-04-08 00:50:50,359 - content_generator_app - ERROR - Error during content generation: Can't instantiate abstract class BaseTool with abstract method _run
+Traceback (most recent call last):
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/content_generator_app.py", line 155, in <module>
+    ).get_tool()
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/tools.py", line 48, in get_tool
+    return BaseTool(
+TypeError: Can't instantiate abstract class BaseTool with abstract method _run
+2025-04-08 00:57:29,103 - content_generator_app - ERROR - Error during content generation: "WebSearchTool" object has no field "api_key"
+Traceback (most recent call last):
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/content_generator_app.py", line 145, in <module>
+    web_search_tool = WebSearchTool(
+  File "/Users/davidescantamburlo/Desktop/TextGenerator/tools.py", line 17, in __init__
+    self.api_key = api_key
+  File "/Users/davidescantamburlo/.pyenv/versions/3.10.13/lib/python3.10/site-packages/pydantic/v1/main.py", line 357, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "WebSearchTool" object has no field "api_key"

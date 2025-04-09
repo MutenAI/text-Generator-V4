@@ -1,0 +1,83 @@
+# Configurazione per l'ottimizzazione dei costi API
+
+# Configurazione della cache
+cache:
+  enabled: true
+  directory: "./cache"
+  # Durata massima della cache in secondi
+  default_max_age: 86400  # 24 ore
+  # Intervallo di pulizia automatica in secondi
+  cleanup_interval: 604800  # 7 giorni
+
+# Configurazione dell'ottimizzatore LLM
+llm_optimizer:
+  enabled: true
+  # Quote di utilizzo per modello (chiamate per intervallo)
+  quotas:
+    "gpt-4": 50
+    "gpt-4-turbo": 100
+    "gpt-3.5-turbo": 200
+    "claude-3-opus-20240229": 30
+    "claude-3-sonnet-20240229": 100
+    "claude-3-haiku-20240307": 200
+    "deepseek-chat": 300
+    "deepseek-coder": 300
+  # Intervallo di reset delle quote in secondi
+  quota_reset_interval: 3600  # 1 ora
+  # Ottimizzazione dei prompt
+  prompt_optimization: true
+
+# Configurazione dell'ottimizzatore dei workflow
+workflow_optimizer:
+  enabled: true
+  # Abilita la fusione di passaggi compatibili
+  merge_compatible_steps: true
+  # Abilita l'assegnazione automatica dei modelli
+  auto_assign_models: true
+  # Coppie di passaggi che possono essere uniti
+  mergeable_pairs:
+    - ["research", "outline"]
+    - ["draft", "review"]
+    - ["edit", "finalize"]
+    - ["brainstorm", "draft"]
+
+# Mappatura della complessità dei task
+task_complexity:
+  high:
+    - "expert_review"
+    - "technical_draft"
+    - "research"
+  medium:
+    - "outline"
+    - "draft"
+    - "edit"
+    - "review"
+  low:
+    - "finalize"
+    - "optimize"
+    - "brainstorm"
+
+# Preferenze di provider per task
+provider_preferences:
+  openai:
+    - "research"
+    - "outline"
+    - "finalize"
+  anthropic:
+    - "draft"
+    - "technical_draft"
+    - "edit"
+  deepseek:
+    - "brainstorm"
+    - "optimize"
+    - "review"
+
+# Configurazione del monitoraggio
+monitoring:
+  enabled: true
+  # Salva statistiche su file
+  save_stats: true
+  # Percorso del file di statistiche
+  stats_file: "./config/optimization_stats.json"
+  # Intervallo di salvataggio in secondi
+  save_interval: 3600  # 1 ora

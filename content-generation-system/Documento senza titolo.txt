@@ -1,0 +1,446 @@
+﻿from crewai import Task
+import logging
+import yaml
+import os
+
+
+class WorkflowManager:
+    """Gestisce i diversi flussi di lavoro per la generazione dei contenuti."""
+
+
+    def __init__(self, agents, config_path=None, logger=None):
+        """
+        Inizializza il workflow manager.
+        
+        Args:
+            agents: Dizionario di agenti disponibili
+            config_path: Percorso al file di configurazione dei workflow (YAML)
+            logger: Logger opzionale
+        """
+        self.agents = agents
+        self.logger = logger or logging.getLogger(__name__)
+        self.workflows = {}
+        
+        # Carica workflow da configurazione o usa default
+        if config_path and os.path.exists(config_path):
+            self._load_workflows_from_config(config_path)
+        else:
+            self.logger.warning("Workflow config not found, using default workflows")
+            self._setup_default_workflows()
+
+
+    def _load_workflows_from_config(self, config_path):
+        """Carica le definizioni dei workflow da un file YAML."""
+        try:
+            with open(config_path, 'r') as f:
+                config = yaml.safe_load(f)
+                
+            if 'workflows' in config:
+                self.workflows = config['workflows']
+                self.logger.info(f"Loaded {len(self.workflows)} workflows from configuration")
+            else:
+                self.logger.warning("No workflows found in configuration file")
+                self._setup_default_workflows()
+                
+        except Exception as e:
+            self.logger.error(f"Error loading workflow configuration: {str(e)}")
+            self._setup_default_workflows()
+
+
+    def _setup_default_workflows(self):
+        """Configura i workflow predefiniti."""
+        self.workflows = {
+            "standard": {
+                "name": "Standard Article",
+                "description": "800-1000 word article on a specific topic",
+                "word_count": 1000,
+                "tasks": [
+                    {
+                        "name": "research",
+                        "agent": "web_searcher",
+                        "description": "Research thoroughly on the topic. Find current, accurate information and summarize the key points in a structured format. Gather enough information to support a 800-1000 word article.",
+                        "expected_output": "A comprehensive research summary in markdown format.",
+                        "async": False
+                    },
+                    {
+                        "name": "architecture",
+                        "agent": "architect",
+                        "description": "Design a content structure for a 800-1000 word article. Create an outline with introduction, 2-3 main sections, and conclusion. Each section should be approximately 200-300 words.",
+                        "expected_output": "A detailed content outline with section breakdowns.",
+                        "async": False,
+                        "dependencies": ["research"]
+                    },
+                    {
+                        "name": "writing",
+                        "agent": "copywriter",
+                        "description": "Create an engaging and informative article of 800-1000 words based on the research summary and outline provided. Follow the structure created by the Content Architect.",
+                        "expected_output": "A well-structured article in markdown format.",
+                        "async": False,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "editing",
+                        "agent": "editor",
+                        "description": "Optimize the article to align with the brand voice and style. Use the brand reference document to match the tone, style, and structure.",
+                        "expected_output": "The final polished content aligned with the brand voice.",
+                        "async": False,
+                        "dependencies": ["writing"]
+                    },
+                    {
+                        "name": "quality_check",
+                        "agent": "quality_checker",
+                        "description": "Review the final content for quality, adherence to guidelines, factual accuracy, and readability. Provide a quality score and improvement suggestions.",
+                        "expected_output": "Quality assessment report with score and feedback.",
+                        "async": False,
+                        "dependencies": ["editing"]
+                    }
+                ]
+            },
+            "extended_article": {
+                "name": "Extended Article",
+                "description": "1500+ word in-depth article on a specific topic",
+                "word_count": 1500,
+                "tasks": [
+                    {
+                        "name": "research",
+                        "agent": "web_searcher",
+                        "description": "Research thoroughly on the topic. Focus on gathering comprehensive information, current trends, and expert insights.",
+                        "expected_output": "A detailed research summary in markdown format.",
+                        "async": False
+                    },
+                    {
+                        "name": "architecture",
+                        "agent": "architect",
+                        "description": "Design a detailed structure for a 1500-word article. Create an outline that includes introduction, main sections with key arguments, and conclusion.",
+                        "expected_output": "A detailed content outline with section breakdowns.",
+                        "async": False,
+                        "dependencies": ["research"]
+                    },
+                    {
+                        "name": "intro_section",
+                        "agent": "section_writer",
+                        "description": "Write the 'Introduction and Context' section for the article. Target length: 250 words.",
+                        "expected_output": "Completed Introduction section in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "main_section",
+                        "agent": "section_writer",
+                        "description": "Write the 'Main Concepts and Analysis' section for the article. Target length: 500 words.",
+                        "expected_output": "Completed Main Concepts section in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "applications_section",
+                        "agent": "section_writer",
+                        "description": "Write the 'Practical Applications and Benefits' section for the article. Target length: 500 words.",
+                        "expected_output": "Completed Applications section in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "conclusion_section",
+                        "agent": "section_writer",
+                        "description": "Write the 'Conclusions and Future Perspectives' section for the article. Target length: 250 words.",
+                        "expected_output": "Completed Conclusion section in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "assembly",
+                        "agent": "editor",
+                        "description": "Assemble all sections into a cohesive document, ensuring smooth transitions between sections.",
+                        "expected_output": "Assembled complete article with proper flow and structure.",
+                        "async": False,
+                        "dependencies": ["intro_section", "main_section", "applications_section", "conclusion_section"]
+                    },
+                    {
+                        "name": "editing",
+                        "agent": "editor",
+                        "description": "Review and optimize the complete article. Ensure consistency in tone, style, and terminology throughout the document. Align with brand voice.",
+                        "expected_output": "Polished article aligned with brand guidelines.",
+                        "async": False,
+                        "dependencies": ["assembly"]
+                    },
+                    {
+                        "name": "quality_check",
+                        "agent": "quality_checker",
+                        "description": "Review the final content for quality, adherence to guidelines, factual accuracy, and readability. Provide a quality score and improvement suggestions.",
+                        "expected_output": "Quality assessment report with score and feedback.",
+                        "async": False,
+                        "dependencies": ["editing"]
+                    }
+                ]
+            },
+            "whitepaper": {
+                "name": "White Paper",
+                "description": "Comprehensive white paper on a specific topic",
+                "word_count": 3000,
+                "tasks": [
+                    {
+                        "name": "research",
+                        "agent": "web_searcher",
+                        "description": "Conduct comprehensive research on the topic. Focus on gathering in-depth information, current trends, statistics, and expert insights.",
+                        "expected_output": "A detailed research compilation with comprehensive insights.",
+                        "async": False
+                    },
+                    {
+                        "name": "architecture",
+                        "agent": "architect",
+                        "description": "Design a detailed structure for a white paper. Create a comprehensive outline that includes main sections, subsections, key arguments, and data presentation points.",
+                        "expected_output": "A detailed content outline with section breakdowns.",
+                        "async": False,
+                        "dependencies": ["research"]
+                    },
+                    {
+                        "name": "exec_summary",
+                        "agent": "section_writer",
+                        "description": "Write the 'Executive Summary' section for the white paper. This should provide a concise overview of the entire document, highlighting key points and conclusions.",
+                        "expected_output": "Completed Executive Summary in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "introduction",
+                        "agent": "section_writer",
+                        "description": "Write the 'Introduction' section for the white paper. Establish the context, problem statement, and purpose of the document.",
+                        "expected_output": "Completed Introduction in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "background",
+                        "agent": "section_writer",
+                        "description": "Write the 'Background and Context' section for the white paper. Provide relevant historical information and current state of the topic.",
+                        "expected_output": "Completed Background section in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "analysis",
+                        "agent": "section_writer",
+                        "description": "Write the 'Main Analysis and Findings' section for the white paper. Present core arguments, data, and evidence.",
+                        "expected_output": "Completed Analysis section in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "technical",
+                        "agent": "section_writer",
+                        "description": "Write the 'Technical Details and Implementation' section for the white paper. Provide specific methodologies, technologies, or approaches.",
+                        "expected_output": "Completed Technical Details section in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "case_studies",
+                        "agent": "section_writer",
+                        "description": "Write the 'Case Studies and Examples' section for the white paper. Provide real-world applications and illustrative examples.",
+                        "expected_output": "Completed Case Studies section in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "recommendations",
+                        "agent": "section_writer",
+                        "description": "Write the 'Conclusions and Recommendations' section for the white paper. Summarize findings and suggest actionable steps.",
+                        "expected_output": "Completed Recommendations section in markdown format.",
+                        "async": True,
+                        "dependencies": ["architecture"]
+                    },
+                    {
+                        "name": "assembly",
+                        "agent": "editor",
+                        "description": "Assemble all sections into a cohesive document, ensuring smooth transitions between sections.",
+                        "expected_output": "Assembled complete white paper with proper flow and structure.",
+                        "async": False,
+                        "dependencies": ["exec_summary", "introduction", "background", "analysis", "technical", "case_studies", "recommendations"]
+                    },
+                    {
+                        "name": "editing",
+                        "agent": "editor",
+                        "description": "Review and optimize the complete white paper. Ensure consistency in tone, style, and terminology throughout the document. Align with brand voice.",
+                        "expected_output": "Polished white paper aligned with brand guidelines.",
+                        "async": False,
+                        "dependencies": ["assembly"]
+                    },
+                    {
+                        "name": "quality_check",
+                        "agent": "quality_checker",
+                        "description": "Review the final white paper for quality, adherence to guidelines, factual accuracy, and readability. Provide a quality score and improvement suggestions.",
+                        "expected_output": "Quality assessment report with score and feedback.",
+                        "async": False,
+                        "dependencies": ["editing"]
+                    },
+                    {
+                        "name": "final_revision",
+                        "agent": "editor",
+                        "description": "Implement quality improvement suggestions and make final revisions to the white paper.",
+                        "expected_output": "Final version of the white paper ready for publication.",
+                        "async": False,
+                        "dependencies": ["quality_check"],
+                        "conditional": {"field": "quality_score", "operator": "<", "value": 8}
+                    }
+                ]
+            },
+            "social_content": {
+                "name": "Social Media Content Pack",
+                "description": "Set of related social media posts on a topic",
+                "word_count": 500,
+                "tasks": [
+                    {
+                        "name": "research",
+                        "agent": "web_searcher",
+                        "description": "Research current trends and information on the topic specifically for social media content.",
+                        "expected_output": "A concise research summary focused on social sharing points.",
+                        "async": False
+                    },
+                    {
+                        "name": "social_strategy",
+                        "agent": "architect",
+                        "description": "Design a content strategy for multiple social platforms (LinkedIn, Twitter, Facebook) with key messaging points.",
+                        "expected_output": "Social media content strategy with platform-specific approaches.",
+                        "async": False,
+                        "dependencies": ["research"]
+                    },
+                    {
+                        "name": "content_creation",
+                        "agent": "copywriter",
+                        "description": "Create a set of 5 related social media posts for each platform based on the strategy. Include suggested hashtags and posting schedule.",
+                        "expected_output": "Complete set of platform-optimized social media posts.",
+                        "async": False,
+                        "dependencies": ["social_strategy"]
+                    },
+                    {
+                        "name": "review",
+                        "agent": "editor",
+                        "description": "Review and optimize all social content for brand voice, engagement potential, and platform-specific best practices.",
+                        "expected_output": "Refined social media content pack ready for scheduling.",
+                        "async": False,
+                        "dependencies": ["content_creation"]
+                    }
+                ]
+            }
+        }
+        self.logger.info("Set up default workflows")
+
+
+    def create_tasks(self, topic, content_type="article"):
+        """
+        Crea la sequenza di task appropriata in base al tipo di contenuto.
+        
+        Args:
+            topic: Argomento del contenuto
+            content_type: Tipo di contenuto (standard, extended_article, whitepaper, etc.)
+            
+        Returns:
+            list: Lista di task CrewAI
+        """
+        # Mappa i tipi di contenuto ai workflow
+        workflow_mapping = {
+            "article": "standard",
+            "extended_article": "extended_article",
+            "whitepaper": "whitepaper",
+            "social": "social_content"
+        }
+        
+        # Determina quale workflow utilizzare
+        workflow_key = workflow_mapping.get(content_type, "standard")
+        
+        if workflow_key not in self.workflows:
+            self.logger.warning(f"Workflow '{workflow_key}' not found, using standard workflow")
+            workflow_key = "standard"
+            
+        workflow = self.workflows[workflow_key]
+        self.logger.info(f"Using workflow: {workflow['name']} for content type: {content_type}")
+        
+        # Crea i task CrewAI
+        return self._create_tasks_from_workflow(workflow, topic)
+    
+    def _create_tasks_from_workflow(self, workflow, topic):
+        """
+        Crea task CrewAI da una definizione di workflow.
+        
+        Args:
+            workflow: Definizione del workflow
+            topic: Argomento del contenuto
+            
+        Returns:
+            list: Lista di task CrewAI
+        """
+        tasks = []
+        task_map = {}  # Per riferimento alle dipendenze
+        
+        for task_def in workflow.get('tasks', []):
+            # Sostituisci placeholder nel testo
+            description = task_def.get('description', '').replace('{topic}', topic)
+            
+            # Risolvi dipendenze
+            dependencies = []
+            for dep_name in task_def.get('dependencies', []):
+                if dep_name in task_map:
+                    dependencies.append(task_map[dep_name])
+                else:
+                    self.logger.warning(f"Dependency '{dep_name}' not found for task '{task_def.get('name')}'")
+            
+            # Crea task CrewAI
+            agent = self.agents.get(task_def.get('agent'))
+            if not agent:
+                self.logger.error(f"Agent '{task_def.get('agent')}' not found for task '{task_def.get('name')}'")
+                continue
+                
+            task = Task(
+                description=description,
+                expected_output=task_def.get('expected_output', ''),
+                agent=agent,
+                async_execution=task_def.get('async', False),
+                dependencies=dependencies if dependencies else None
+            )
+            
+            tasks.append(task)
+            task_map[task_def.get('name')] = task
+            
+        return tasks
+    
+    def get_available_workflows(self):
+        """Restituisce i workflow disponibili."""
+        return {key: workflow['name'] for key, workflow in self.workflows.items()}
+    
+    def add_workflow(self, key, workflow_definition):
+        """
+        Aggiunge un nuovo workflow.
+        
+        Args:
+            key: Chiave identificativa del workflow
+            workflow_definition: Definizione del workflow
+            
+        Returns:
+            bool: True se aggiunto con successo
+        """
+        if key in self.workflows:
+            self.logger.warning(f"Workflow '{key}' already exists, will be overwritten")
+            
+        self.workflows[key] = workflow_definition
+        self.logger.info(f"Added workflow: {workflow_definition.get('name', key)}")
+        return True
+        
+    def save_workflows_to_file(self, file_path):
+        """
+        Salva i workflow in un file di configurazione.
+        
+        Args:
+            file_path: Percorso del file di output
+            
+        Returns:
+            bool: True se salvato con successo
+        """
+        try:
+            with open(file_path, 'w') as f:
+                yaml.dump({'workflows': self.workflows}, f, default_flow_style=False)
+            self.logger.info(f"Saved {len(self.workflows)} workflows to {file_path}")
+            return True
+        except Exception as e:
+            self.logger.error(f"Error saving workflows to file: {str(e)}")
+            return False
