@@ -3,16 +3,12 @@
 workflows:
   standard:
     steps:
-      - task: research
-        description: "Ricerca e raccolta informazioni sul tema"
-      - task: outline
-        description: "Creazione della struttura del contenuto"
-      - task: draft
-        description: "Scrittura della prima bozza"
-      - task: review
-        description: "Revisione e miglioramento del contenuto"
-      - task: finalize
-        description: "Finalizzazione e formattazione"
+      - task: research_and_outline
+        description: "Ricerca informazioni e creazione della struttura del contenuto"
+      - task: draft_and_edit
+        description: "Scrittura e ottimizzazione del contenuto"
+      - task: review_and_finalize
+        description: "Revisione finale e formattazione del contenuto"
 
   extended_article:
     steps:

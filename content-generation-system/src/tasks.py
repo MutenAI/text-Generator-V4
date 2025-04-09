@@ -18,52 +18,35 @@ class WorkflowManager:
         return self._create_standard_workflow(topic)
 
     def _create_standard_workflow(self, topic):
-        """Crea il flusso di lavoro standard per articoli di media lunghezza (800-1000 parole)."""
-        # Task 1: Web Research
-        research_task = Task(
-            description=f"Research thoroughly on the topic: '{topic}'. Find current, accurate information and summarize the key points in a structured format. Gather enough information to support a 800-1000 word article. Your task is to provide a comprehensive research summary in markdown format. Include key points, facts, and insights on the topic. Use your web search tool to gather current and accurate information. Output format: markdown",
-            expected_output="A comprehensive research summary in markdown format with sufficient material for a 800-1000 word article.",
-            agent=self.agents["web_searcher"],
+        """Crea il flusso di lavoro standard ottimizzato per articoli di media lunghezza (800-1000 parole)."""
+        # Task 1: Research + Outline (Combinati)
+        research_outline_task = Task(
+            description=f"Research and outline for topic: '{topic}'. Complete these two tasks together:\n\n1. Research thoroughly on the topic. Find current, accurate information using your web search tool.\n2. Based on your research, design a content structure for a 800-1000 word article with introduction, 2-3 main sections, and conclusion.\n\nYour output should include both a comprehensive research summary and a detailed content outline with section breakdowns.",
+            expected_output="A research summary and content outline for a 800-1000 word article in markdown format.",
+            agent=self.agents["web_searcher"],  # Utilizziamo il web_searcher che può fare anche l'outline
             async_execution=False
         )
         
-        # Task 2: Content Architecture
-        architecture_task = Task(
-            description=f"Design a content structure for a 800-1000 word article on '{topic}'. Create an outline with introduction, 2-3 main sections, and conclusion. Each section should be approximately 200-300 words. Ensure logical flow and comprehensive coverage of the topic.",
-            expected_output="A detailed content outline with section breakdowns for a 800-1000 word article.",
-            agent=self.agents["architect"],
+        # Task 2: Content Creation + Initial Editing
+        writing_editing_task = Task(
+            description=f"Create and optimize an article on '{topic}' following these steps:\n\n1. Write an engaging and informative article of 800-1000 words based on the provided research and outline.\n2. Follow the structure with introduction, 2-3 main sections (200-300 words each), and conclusion.\n3. Apply best practices for writing style:\n   - Use a professional yet conversational tone\n   - Ensure active voice and proper sentence structure\n   - Maintain logical flow with clear headings and subheadings\n   - Make content accessible and interesting for the target audience\n\nYour output should be a well-structured and polished article ready for final review.",
+            expected_output="A well-structured and initially optimized article of 800-1000 words in markdown format.",
+            agent=self.agents["copywriter"],  # Il copywriter si occupa sia della scrittura che dell'editing iniziale
             async_execution=False,
-            dependencies=[research_task]
+            dependencies=[research_outline_task]
         )
         
-        # Task 3: Content Creation
-        writing_task = Task(
-            description=f"Create an engaging and informative article of 800-1000 words about '{topic}' based on the research summary and outline provided. Follow the structure created by the Content Architect. Each main section should be 200-300 words, with a clear introduction and conclusion. Use headings, subheadings, and maintain a logical flow. Make it accessible and interesting for the target audience.",
-            expected_output="A well-structured article of 800-1000 words in markdown format.",
-            agent=self.agents["copywriter"],
+        # Task 3: Final Review + Optimization
+        review_finalize_task = Task(
+            description=f"Review and finalize the article about '{topic}' following these steps:\n\n1. Use the MarkdownParserTool to extract brand guidelines from the reference file.\n2. Review and optimize the content based on:\n   - Factual accuracy against the research summary\n   - Alignment with brand voice and style guidelines\n   - Content structure and logical flow\n   - Quality and engagement level\n   - Technical accuracy\n3. Make all necessary improvements and generate the final output:\n   - Apply corrections for any inaccuracies\n   - Enhance flow and transitions where needed\n   - Adjust tone and style to match brand guidelines\n   - Ensure the article maintains its target length (800-1000 words)\n   - Format according to markdown standards\n\nThe final output should be the complete, publication-ready article.",
+            expected_output="The final, publication-ready article in markdown format, incorporating all necessary improvements and aligned with brand guidelines.",
+            agent=self.agents["editor"],  # L'editor si occupa sia della revisione che della finalizzazione
             async_execution=False,
-            dependencies=[architecture_task]
+            dependencies=[writing_editing_task],
+            tools=[self.agents["editor"].tools[0]]  # Assicuriamo che lo strumento markdown sia disponibile
         )
         
-        # Task 4: Content Optimization
-        editing_task = Task(
-            description=f"Optimize the 800-1000 word article about '{topic}' following these steps:\n\n1. Use the MarkdownParserTool to extract and analyze these specific sections from the reference file:\n   - Brand Voice: Apply the professional yet conversational tone\n   - Content Structure: Follow the blog post structure guidelines\n   - Writing Guidelines: Ensure active voice and proper sentence structure\n   - Terminology Preferences: Use preferred terms and avoid discouraged ones\n\n2. Apply the extracted guidelines:\n   - Verify the content follows the specified blog post structure (clear headline, introduction, body with subheadings, conclusion)\n   - Ensure the tone is professional yet conversational as specified in the Brand Voice section\n   - Apply the writing guidelines for active voice, sentence structure, and grammar\n   - Check and replace terminology according to the preferences\n\n3. Final Checks:\n   - Verify the content maintains the target length (800-1000 words)\n   - Ensure consistent style throughout the document\n   - Confirm all sections flow logically\n   - Validate factual accuracy is preserved",
-            expected_output="The final polished content of 800-1000 words in markdown format, aligned with Fylle's brand voice and style guidelines.",
-            agent=self.agents["editor"],
-            async_execution=False,
-            dependencies=[writing_task]
-        )
-        
-        # Task 5: Quality Review (Optional)
-        review_task = Task(
-            description=f"Review and finalize the article about '{topic}' following these steps:\n\n1. Review Criteria:\n   - Verify factual accuracy against research summary\n   - Check content structure and flow\n   - Confirm brand guidelines compliance\n   - Assess content quality and engagement\n   - Review technical accuracy\n\n2. Make Necessary Improvements:\n   - Apply corrections for any factual inaccuracies\n   - Enhance flow and transitions where needed\n   - Adjust tone and style to match brand guidelines\n   - Improve clarity and engagement\n   - Fix any technical errors\n\n3. Generate Final Output:\n   - Incorporate all improvements into the final version\n   - Ensure the article maintains its target length\n   - Format according to markdown standards\n   - Add any necessary metadata\n\nThe final output should be the complete, polished article ready for publication.",
-            expected_output="The final, publication-ready article in markdown format, incorporating all necessary improvements and corrections.",
-            agent=self.agents["quality_reviewer"],
-            async_execution=False,
-            dependencies=[editing_task]
-        )
-        
-        return [research_task, writing_task, editing_task, review_task]
+        return [research_outline_task, writing_editing_task, review_finalize_task]
 
     def _create_extended_article_workflow(self, topic):
         """Crea il flusso di lavoro per articoli lunghi (1500+ parole)."""
