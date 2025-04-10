@@ -6,7 +6,7 @@ import json
 from typing import Optional, Dict, Any
 from requests.exceptions import RequestException, HTTPError, ConnectionError, Timeout
 from json.decoder import JSONDecodeError
-from langchain.tools import Tool
+from langchain.tools import BaseTool, Tool
 from .config import SERPER_API_KEY
 
 # Configurazione logging
@@ -137,9 +137,9 @@ class WebSearchTool:
     
     def get_tool(self):
         """Restituisce un oggetto Tool per l'integrazione con CrewAI."""
-        return Tool(
-            name="web_search",
+        return Tool.from_function(
             func=self.search,
+            name="web_search",
             description="Search the web for comprehensive information on a topic. Returns a structured summary of findings."
         )
 
@@ -207,8 +207,8 @@ class MarkdownParserTool:
     
     def get_tool(self):
         """Restituisce un oggetto Tool per l'integrazione con CrewAI."""
-        return Tool(
-            name="markdown_reference",
+        return Tool.from_function(
             func=self.get_content,
+            name="markdown_reference",
             description="Get content from the reference markdown file. Optionally specify a section name to get only that part."
         )
