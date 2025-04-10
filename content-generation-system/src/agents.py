@@ -4,6 +4,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain.chat_models import ChatOpenAI as LangchainChatOpenAI
 from .config import LLM_MODELS, OPENAI_API_KEY, ANTHROPIC_API_KEY, validate_environment
 import os
+from typing import Dict, List, Optional, Any
 
 class AgentsFactory:
     """Factory per creare gli agenti specializzati per la generazione di contenuti."""
