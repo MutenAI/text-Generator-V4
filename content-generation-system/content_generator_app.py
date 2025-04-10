@@ -270,7 +270,7 @@ if generate_button:
                 crew_config = {
                     'agents': list(agents.values()),
                     'tasks': tasks,
-                    'verbose': 2 if show_logs or detailed_logs else 1,
+                    'verbose': True if show_logs or detailed_logs else False,
                     'process': Process.hierarchical if use_parallel else Process.sequential
                 }
                 
