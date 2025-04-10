@@ -176,10 +176,14 @@ with st.form("generation_form"):
                 reverse_mapping = {v: k for k, v in workflow_labels.items()}
                 if selected_display in reverse_mapping:
                     selected_workflow = reverse_mapping[selected_display]
-                elif workflow_options and selected_display in workflow_options:
+                elif workflow_options and selected_display in workflow_options and workflow_options.index(selected_display) < len(workflows):
                     selected_workflow = workflows[workflow_options.index(selected_display)]
                 else:
                     selected_workflow = workflows[0] if workflows else None
+                
+                # Assicuriamoci che selected_workflow non sia None
+                if selected_workflow is None and workflows:
+                    selected_workflow = workflows[0]
         else:
             selected_workflow = None
 
