@@ -54,7 +54,7 @@ class AgentsFactory:
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
                 ),
-                tools=[web_search_tool]
+                tools=[web_search_tool] if web_search_tool is not None else []
             )
         else:
             # Usa OpenAI per Web Searcher (comportamento predefinito)
@@ -69,7 +69,7 @@ class AgentsFactory:
                     model_name=model_name,
                     api_key=openai_api_key
                 ),
-                tools=[web_search_tool]
+                tools=[web_search_tool] if web_search_tool is not None else []
             )
 
         # 2. Content Architect
@@ -180,7 +180,7 @@ class AgentsFactory:
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
                 ),
-                tools=[markdown_tool]
+                tools=[markdown_tool] if markdown_tool is not None else []
             )
         else:
             # Usa OpenAI per Editor (comportamento predefinito)
@@ -195,7 +195,7 @@ class AgentsFactory:
                     model_name=model_name,
                     api_key=openai_api_key
                 ),
-                tools=[markdown_tool]
+                tools=[markdown_tool] if markdown_tool is not None else []
             )
 
         # 6. Quality Reviewer
@@ -213,7 +213,7 @@ class AgentsFactory:
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
                 ),
-                tools=[markdown_tool]
+                tools=[markdown_tool] if markdown_tool is not None else []
             )
         else:
             # Usa OpenAI per Quality Reviewer (comportamento predefinito)
@@ -228,7 +228,7 @@ class AgentsFactory:
                     model_name="gpt-4",  # Usa sempre GPT-4 per la qualità
                     api_key=openai_api_key
                 ),
-                tools=[markdown_tool]
+                tools=[markdown_tool] if markdown_tool is not None else []
             )
 
         agents = {
