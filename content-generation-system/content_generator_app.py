@@ -155,7 +155,8 @@ with st.form("generation_form"):
     with col2:
         # Selezione workflow
         content_types = {
-            "standard": "Articolo Standard (800-1000 parole)"
+            "standard": "Articolo Standard (800-1000 parole)",
+            "whitepaper": "White Paper (3000+ parole)"
         }
 
         content_type = st.selectbox(
