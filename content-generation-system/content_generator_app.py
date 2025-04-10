@@ -312,6 +312,12 @@ if generate_button:
                 result = crew.kickoff()
                 execution_time = time.time() - start_time
 
+                # Converti il risultato in una stringa se è un oggetto CrewOutput
+                if hasattr(result, 'raw_output'):
+                    result_text = result.raw_output
+                else:
+                    result_text = str(result)
+
                 # Aggiorna la progress bar al completamento
                 progress_bar.progress(1.0)
                 status_text.write("✅ Generazione completata!")
@@ -319,7 +325,7 @@ if generate_button:
                 # Salva il risultato
                 if save_to_file:
                     with open(output_filename, 'w', encoding='utf-8') as f:
-                        f.write(result)
+                        f.write(result_text)
                     st.write(f"💾 Contenuto salvato in: {output_filename}")
 
                 st.write(f"⏱️ Tempo di esecuzione: {execution_time:.2f} secondi")
@@ -332,7 +338,7 @@ if generate_button:
 
             with tab1:
                 st.markdown("## Contenuto Generato")
-                st.markdown(result)
+                st.markdown(result_text)
 
             with tab2:
                 st.markdown("## Dettagli di Generazione")

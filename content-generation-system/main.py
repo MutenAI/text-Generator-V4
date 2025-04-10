@@ -52,10 +52,16 @@ def main():
     # Esegui crew e ottieni risultato
     result = crew.kickoff()
     
+    # Converti il risultato in una stringa se è un oggetto CrewOutput
+    if hasattr(result, 'raw_output'):
+        result_text = result.raw_output
+    else:
+        result_text = str(result)
+    
     # Salva l'output
     output_file = generate_output_filename(args.topic, output_dir)
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(result)
+        f.write(result_text)
     
     print(f"Content generation completed! Output saved to: {output_file}")
 
