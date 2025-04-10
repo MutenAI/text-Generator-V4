@@ -1,8 +1,8 @@
 from crewai import Agent
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
-from langchain_community.chat_models import ChatOpenAI as LangchainChatOpenAI
-from langchain_core.tools import BaseTool
+from langchain.chat_models import ChatOpenAI as LangchainChatOpenAI
+from langchain.tools import Tool
 from .config import LLM_MODELS, OPENAI_API_KEY, ANTHROPIC_API_KEY, validate_environment
 import os
 from typing import Dict, List, Optional, Any
@@ -81,7 +81,7 @@ class AgentsFactory:
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
                 ),
-                tools=[web_search_tool.get_tool()] if web_search_tool else None
+                tools=[web_search_tool] if web_search_tool else None
             )
         else:
             # Usa OpenAI per Web Searcher (comportamento predefinito)
@@ -96,7 +96,7 @@ class AgentsFactory:
                     model_name=model_name,
                     api_key=openai_api_key
                 ),
-                tools=[web_search_tool.get_tool()] if web_search_tool else None
+                tools=[web_search_tool] if web_search_tool else None
             )
 
         # 2. Content Architect
@@ -213,7 +213,7 @@ class AgentsFactory:
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
                 ),
-                tools=[markdown_tool.get_tool()] if markdown_tool else None
+                tools=[markdown_tool] if markdown_tool else None
             )
         else:
             # Usa OpenAI per Editor (comportamento predefinito)
@@ -228,7 +228,7 @@ class AgentsFactory:
                     model_name=model_name,
                     api_key=openai_api_key
                 ),
-                tools=[markdown_tool.get_tool()] if markdown_tool else None
+                tools=[markdown_tool]
             )
 
         # 6. Quality Reviewer
@@ -246,7 +246,7 @@ class AgentsFactory:
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
                 ),
-                tools=[markdown_tool.get_tool()] if markdown_tool else None
+                tools=[markdown_tool] if markdown_tool else None
             )
         else:
             # Usa OpenAI per Quality Reviewer (comportamento predefinito)
@@ -261,7 +261,7 @@ class AgentsFactory:
                     model_name="gpt-4",  # Usa sempre GPT-4 per la qualità
                     api_key=openai_api_key
                 ),
-                tools=[markdown_tool.get_tool()] if markdown_tool else None
+                tools=[markdown_tool] if markdown_tool else None
             )
 
         agents = {

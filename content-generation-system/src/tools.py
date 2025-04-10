@@ -137,8 +137,6 @@ class WebSearchTool:
     
     def get_tool(self):
         """Restituisce un oggetto Tool per l'integrazione con CrewAI."""
-        from langchain_core.tools import Tool
-        # Creiamo uno strumento compatibile con CrewAI
         return Tool(
             name="web_search",
             func=self.search,
@@ -209,8 +207,6 @@ class MarkdownParserTool:
     
     def get_tool(self):
         """Restituisce un oggetto Tool per l'integrazione con CrewAI."""
-        from langchain_core.tools import Tool
-        # Creiamo uno strumento compatibile con CrewAI
         return Tool(
             name="markdown_reference",
             func=self.get_content,

@@ -165,7 +165,7 @@ with st.form("generation_form"):
                 # Prima tenta di caricare il file specificato
                 with open(config_file, 'r') as f:
                     config_data = yaml.safe_load(f)
-
+                
                 # Se non ci sono workflow, prova a cercare specificamente il file workflows.yaml
                 if not config_data or 'workflows' not in config_data:
                     # Cerca in directory locale e in config/
@@ -174,7 +174,7 @@ with st.form("generation_form"):
                         os.path.join(base_dir, "config", "workflows.yaml"),
                         os.path.join(base_dir, "workflows.yaml")
                     ]
-
+                    
                     for wf_file in workflow_files:
                         if os.path.exists(wf_file):
                             st.info(f"Tentativo di caricamento workflow da: {wf_file}")
@@ -183,7 +183,7 @@ with st.form("generation_form"):
                             if config_data and 'workflows' in config_data:
                                 st.success(f"Trovati workflow in: {wf_file}")
                                 break
-
+                
                 # Verifica finale
                 if not config_data or 'workflows' not in config_data:
                     st.error("Nessuna definizione di workflow trovata nei file di configurazione.")
@@ -217,7 +217,7 @@ with st.form("generation_form"):
                     selected_workflow = workflows[workflow_options.index(selected_display)]
                 else:
                     selected_workflow = workflows[0] if workflows else None
-
+                
                 # Assicuriamoci che selected_workflow non sia None
                 if selected_workflow is None and workflows:
                     selected_workflow = workflows[0]
@@ -266,12 +266,15 @@ if generate_button:
 
                 # Inizializza tools
                 st.write("🔍 Inizializzazione tools...")
-                web_search_tool = WebSearchTool()
+                web_search_tool = WebSearchTool(
+                    api_key=config.serper_api_key
+                ).get_tool()
+
                 markdown_tool = None
                 if config.brand_reference_file and os.path.exists(config.brand_reference_file):
                     markdown_tool = MarkdownParserTool(
                         file_path=config.brand_reference_file
-                    )
+                    ).get_tool()
                     st.write(f"📚 Tool markdown inizializzato con {config.brand_reference_file}")
 
                 # Inizializza agenti

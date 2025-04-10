@@ -28,8 +28,8 @@ def main():
     output_dir = ensure_directory_exists(args.output)
     
     # Inizializza tool
-    web_search_tool = WebSearchTool()
-    markdown_tool = MarkdownParserTool(file_path=args.reference)
+    web_search_tool = WebSearchTool().get_tool()
+    markdown_tool = MarkdownParserTool(file_path=args.reference).get_tool()
     
     # Crea agenti
     agents_factory = AgentsFactory()
