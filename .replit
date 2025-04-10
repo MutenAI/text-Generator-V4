@@ -104,6 +104,15 @@ mode = "sequential"
 task = "shell.exec"
 args = "cd content-generation-system && python reference_test.py --file reference/siebert-system-brief-optimized.md --section \"brand guidelines\""
 
+[[workflows.workflow]]
+name = "Whitepaper Ottimizzato"
+author = 40784344
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd content-generation-system && bash run-streamlit.sh"
+
 [[ports]]
 localPort = 8080
 externalPort = 8080
