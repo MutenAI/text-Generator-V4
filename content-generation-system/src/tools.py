@@ -6,7 +6,7 @@ import json
 from typing import Optional, Dict, Any
 from requests.exceptions import RequestException, HTTPError, ConnectionError, Timeout
 from json.decoder import JSONDecodeError
-from langchain.tools import BaseTool, Tool
+from crewai.tools import BaseTool
 from .config import SERPER_API_KEY
 
 # Configurazione logging
@@ -136,11 +136,11 @@ class WebSearchTool:
             return f"Si è verificato un errore durante la ricerca: {str(e)}. Per favore, riprova più tardi."
     
     def get_tool(self):
-        """Restituisce un oggetto Tool per l'integrazione con CrewAI."""
-        return Tool.from_function(
-            func=self.search,
+        """Restituisce un oggetto BaseTool per l'integrazione con CrewAI."""
+        return BaseTool(
             name="web_search",
-            description="Search the web for comprehensive information on a topic. Returns a structured summary of findings."
+            description="Search the web for comprehensive information on a topic. Returns a structured summary of findings.",
+            func=self.search
         )
 
 
@@ -206,9 +206,9 @@ class MarkdownParserTool:
                    "Per favore, verifica che il file sia accessibile e non sia danneggiato."
     
     def get_tool(self):
-        """Restituisce un oggetto Tool per l'integrazione con CrewAI."""
-        return Tool.from_function(
-            func=self.get_content,
+        """Restituisce un oggetto BaseTool per l'integrazione con CrewAI."""
+        return BaseTool(
             name="markdown_reference",
-            description="Get content from the reference markdown file. Optionally specify a section name to get only that part."
+            description="Get content from the reference markdown file. Optionally specify a section name to get only that part.",
+            func=self.get_content
         )
