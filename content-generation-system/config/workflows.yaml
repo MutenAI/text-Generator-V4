@@ -18,21 +18,21 @@ workflows:
         provider_preference: "anthropic"
       
       - task: outline_and_structure
-        description: "Creazione della struttura dettagliata del white paper e definizione delle sezioni chiave"
+        description: "Creazione della struttura dettagliata del white paper (minimo 2000 parole) e definizione delle sezioni chiave"
         complexity: "medium"
         provider_preference: "openai"
       
       - task: content_development
-        description: "Sviluppo dei contenuti principali di ciascuna sezione del white paper"
+        description: "Sviluppo dei contenuti principali di ciascuna sezione del white paper (minimo 2000 parole effettive, esclusi elementi visivi)"
         complexity: "high"
         provider_preference: "anthropic"
       
       - task: expert_review_and_edit
-        description: "Revisione tecnica e ottimizzazione del contenuto per coerenza e qualità"
+        description: "Revisione tecnica e ottimizzazione del contenuto per coerenza e qualità, mantenendo almeno 2000 parole"
         complexity: "high"
         provider_preference: "openai"
       
       - task: visual_planning_and_finalize
-        description: "Pianificazione degli elementi visivi e finalizzazione del documento con note per il designer"
+        description: "Pianificazione degli elementi visivi e finalizzazione del documento con note per il designer, verifica requisito minimo 2000 parole"
         complexity: "high"
         provider_preference: "anthropic"
