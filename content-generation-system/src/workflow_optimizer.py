@@ -257,7 +257,7 @@ class WorkflowOptimizer:
             task_name: Nome del task
             
         Returns:
-            Provider preferito ('openai', 'anthropic', 'deepseek') o None
+            Provider preferito ('openai', 'anthropic') o None
         """
         # Task che funzionano meglio con OpenAI
         openai_tasks = ["research", "outline", "finalize"]
@@ -265,46 +265,27 @@ class WorkflowOptimizer:
         # Task che funzionano meglio con Anthropic
         anthropic_tasks = ["draft", "technical_draft", "edit"]
         
-        # Task che funzionano meglio con DeepSeek (modalità economica)
-        deepseek_tasks = ["research", "draft", "finalize"]
-        
-        # Verifica se è attiva la modalità economica
-        economic_mode = os.getenv('ECONOMIC_MODE', 'false').lower() == 'true'
-        
         # Gestisci i task uniti
         if "_and_" in task_name:
             subtasks = task_name.split("_and_")
+            # Conta quanti subtask preferiscono ciascun provider
+            openai_count = sum(1 for t in subtasks if t in openai_tasks)
+            anthropic_count = sum(1 for t in subtasks if t in anthropic_tasks)
             
-            if economic_mode:
-                # In modalità economica, preferisci DeepSeek quando possibile
-                deepseek_count = sum(1 for t in subtasks if t in deepseek_tasks)
-                if deepseek_count > 0:
-                    return "deepseek"
-                return None  # Nessuna preferenza specifica, usa il default economico
-            else:
-                # In modalità normale, bilancia tra OpenAI e Anthropic
-                openai_count = sum(1 for t in subtasks if t in openai_tasks)
-                anthropic_count = sum(1 for t in subtasks if t in anthropic_tasks)
-                
-                if openai_count > anthropic_count:
-                    return "openai"
-                elif anthropic_count > openai_count:
-                    return "anthropic"
-                else:
-                    return None  # Nessuna preferenza
-        
-        # Task singoli
-        if economic_mode:
-            if task_name in deepseek_tasks:
-                return "deepseek"
-            return None  # Nessuna preferenza specifica, usa il default economico
-        else:
-            if task_name in openai_tasks:
+            if openai_count > anthropic_count:
                 return "openai"
-            elif task_name in anthropic_tasks:
+            elif anthropic_count > openai_count:
                 return "anthropic"
             else:
                 return None  # Nessuna preferenza
+        
+        # Task singoli
+        if task_name in openai_tasks:
+            return "openai"
+        elif task_name in anthropic_tasks:
+            return "anthropic"
+        else:
+            return None  # Nessuna preferenza
     
     def optimize_agent_communication(self, messages: List[Dict[str, Any]], model: str) -> List[Dict[str, Any]]:
         """Ottimizza i messaggi tra agenti per rispettare i limiti di token.

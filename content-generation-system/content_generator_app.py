@@ -41,12 +41,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Forza l'uso di impostazioni server specifiche
-import os
-os.environ['STREAMLIT_SERVER_PORT'] = '8501'
-os.environ['STREAMLIT_SERVER_HEADLESS'] = 'true'
-os.environ['STREAMLIT_SERVER_ADDRESS'] = '0.0.0.0'
-
 st.title("🤖 Content Generator con CrewAI")
 st.subheader("Genera contenuti di alta qualità utilizzando agenti AI specializzati")
 
@@ -160,83 +154,22 @@ with st.form("generation_form"):
 
     with col2:
         # Selezione workflow
-        if config_file:
-            try:
-                # Prima tenta di caricare il file specificato
-                with open(config_file, 'r') as f:
-                    config_data = yaml.safe_load(f)
-                
-                # Se non ci sono workflow, prova a cercare specificamente il file workflows.yaml
-                if not config_data or 'workflows' not in config_data:
-                    # Cerca in directory locale e in config/
-                    workflow_files = [
-                        os.path.join(os.path.dirname(config_file), "workflows.yaml"),
-                        os.path.join(base_dir, "config", "workflows.yaml"),
-                        os.path.join(base_dir, "workflows.yaml")
-                    ]
-                    
-                    for wf_file in workflow_files:
-                        if os.path.exists(wf_file):
-                            st.info(f"Tentativo di caricamento workflow da: {wf_file}")
-                            with open(wf_file, 'r') as wf:
-                                config_data = yaml.safe_load(wf)
-                            if config_data and 'workflows' in config_data:
-                                st.success(f"Trovati workflow in: {wf_file}")
-                                break
-                
-                # Verifica finale
-                if not config_data or 'workflows' not in config_data:
-                    st.error("Nessuna definizione di workflow trovata nei file di configurazione.")
-                    st.info("Assicurati che il file config/workflows.yaml esista e contenga una sezione 'workflows' valida.")
-                    workflows = []
-                else:
-                    workflows = list(config_data.get('workflows', {}).keys())
-                    st.success(f"Caricati {len(workflows)} workflow dal file di configurazione.")
-            except Exception as e:
-                st.error(f"Errore durante il caricamento del file di configurazione: {str(e)}")
-                workflows = []
-            workflow_labels = {
-                'standard': 'Articolo Standard',
-                'whitepaper': 'White Paper (3000+ parole)'
-            }
+        workflow_types = {
+            "standard": "Articolo Standard (800-1000 parole)",
+            "extended_article": "Articolo Esteso (1500+ parole)",
+            "whitepaper": "White Paper (3000+ parole)",
+            "social_content": "Social Media Content Pack"
+        }
 
-            # Verifico che ci siano workflow disponibili
-            if not workflows:
-                st.error("Nessun workflow disponibile nel file di configurazione.")
-                selected_workflow = None
-            else:
-                # Crea una lista di opzioni in formato leggibile
-                workflow_options = [workflow_labels.get(w, w.replace('_', ' ').title()) for w in workflows]
-                selected_display = st.selectbox("Tipo di contenuto", workflow_options)
-
-                # Mappa l'opzione selezionata al nome originale del workflow
-                reverse_mapping = {v: k for k, v in workflow_labels.items()}
-                if selected_display in reverse_mapping:
-                    selected_workflow = reverse_mapping[selected_display]
-                elif workflow_options and selected_display in workflow_options and workflow_options.index(selected_display) < len(workflows):
-                    selected_workflow = workflows[workflow_options.index(selected_display)]
-                else:
-                    selected_workflow = workflows[0] if workflows else None
-                
-                # Assicuriamoci che selected_workflow non sia None
-                if selected_workflow is None and workflows:
-                    selected_workflow = workflows[0]
-        else:
-            selected_workflow = None
-
-    # Aggiunta dell'opzione per la modalità economica
-    economic_mode = st.checkbox("Modalità economica (DeepSeek)", 
-                               value=os.getenv('ECONOMIC_MODE', 'false').lower() == 'true',
-                               help="Utilizza DeepSeek come provider principale per ridurre i costi")
-
-    # Aggiorna la variabile d'ambiente in base alla selezione
-    if economic_mode:
-        os.environ['ECONOMIC_MODE'] = 'true'
-    else:
-        os.environ['ECONOMIC_MODE'] = 'false'
+        content_type = st.selectbox(
+            "Tipo di contenuto",
+            options=list(workflow_types.keys()),
+            format_func=lambda x: workflow_types[x],
+            help="Seleziona il tipo di contenuto da generare"
+        )
 
     # Pulsante di generazione
-    generate_button = st.form_submit_button(label="🚀 Genera Contenuto")
+    generate_button = st.form_submit_button("🚀 Genera Contenuto")
 
 # Gestione della generazione del contenuto
 if generate_button:
@@ -244,8 +177,6 @@ if generate_button:
         st.error("Per favore inserisci un topic per la generazione.")
     elif not config_file or not os.path.exists(config_file):
         st.error("File di configurazione non trovato.")
-    elif not selected_workflow:
-        st.error("Seleziona un tipo di contenuto valido.")
     else:
         try:
             # Mostra il pannello di generazione
@@ -281,7 +212,7 @@ if generate_button:
                 st.write("🤖 Creazione agenti specializzati...")
 
                 # Applica modalità economica se selezionata
-                if use_deepseek_mode or economic_mode:
+                if use_deepseek_mode:
                     st.write("💰 Modalità economica (DeepSeek) attivata")
                     config_dict = config.dict()
                     config_dict["provider_preference"] = "deepseek"
@@ -310,23 +241,23 @@ if generate_button:
                 output_filename = generate_output_filename(topic, output_dir)
 
                 # Ottieni i task per il workflow specificato
-                if not config.workflows or selected_workflow not in config.workflows:
-                    st.error(f"Workflow '{selected_workflow}' non trovato nella configurazione. Verificare il file workflows.yaml.")
+                if not config.workflows or content_type not in config.workflows:
+                    st.error(f"Workflow '{content_type}' non trovato nella configurazione. Verificare il file workflows.yaml.")
                     st.stop()
 
-                workflow_steps = config.workflows[selected_workflow]['steps']
-                st.write(f"📋 Workflow selezionato: {workflow_labels.get(selected_workflow, selected_workflow.replace('_', ' ').title())}")
+                workflow_steps = config.workflows[content_type]['steps']
+                st.write(f"📋 Workflow selezionato: {workflow_types[content_type]}")
                 st.write(f"🔄 Passi da eseguire: {len(workflow_steps)}")
 
                 # Mostra i passi del workflow
                 for step in workflow_steps:
                     st.write(f"- {step['task']}: {step['description']}")
 
-                st.write(f"📋 Creazione task per workflow {selected_workflow}...")
-                tasks = workflow_manager.create_tasks(topic, selected_workflow)
+                st.write(f"📋 Creazione task per workflow {content_type}...")
+                tasks = workflow_manager.create_tasks(topic, content_type)
 
                 if not tasks:
-                    st.error(f"Nessun task generato per il tipo di contenuto: {selected_workflow}")
+                    st.error(f"Nessun task generato per il tipo di contenuto: {content_type}")
                     st.stop()
 
                 st.write(f"✅ Creati {len(tasks)} task per il workflow")
@@ -406,7 +337,7 @@ if generate_button:
             with tab2:
                 st.markdown("## Dettagli di Generazione")
                 st.write(f"**Topic:** {topic}")
-                st.write(f"**Tipo di contenuto:** {workflow_labels.get(selected_workflow, selected_workflow.replace('_', ' ').title())}")
+                st.write(f"**Tipo di contenuto:** {workflow_types[content_type]}")
                 st.write(f"**Reference file:** {reference_file or 'Nessuno'}")
                 st.write(f"**Numero di task:** {len(tasks)}")
                 st.write(f"**Tempo di esecuzione:** {execution_time:.2f} secondi")

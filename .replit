@@ -3,7 +3,7 @@ modules = ["python-3.11"]
 channel = "stable-24_05"
 
 [workflows]
-runButton = "Fix Port"
+runButton = "Run"
 
 [[workflows.workflow]]
 name = "Run"
@@ -12,47 +12,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd content-generation-system && python -m streamlit run content_generator_app.py --server.port=8080 --server.headless=true --server.enableCORS=false --server.enableWebsocketCompression=false --server.address=0.0.0.0"
-
-[[workflows.workflow]]
-name = "Avvia Streamlit"
-author = 40784344
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
 args = "cd content-generation-system && python -m streamlit run content_generator_app.py --server.headless=true --server.enableCORS=false --server.enableWebsocketCompression=false --server.address=0.0.0.0"
-
-[[workflows.workflow]]
-name = "Modalità Economica (DeepSeek)"
-author = 40784344
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd content-generation-system && ECONOMIC_MODE=true python -m streamlit run content_generator_app.py --server.headless=true --server.enableCORS=false --server.enableWebsocketCompression=false --server.address=0.0.0.0"
-
-[[workflows.workflow]]
-name = "Modalità Standard"
-author = 40784344
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd content-generation-system && ECONOMIC_MODE=false python -m streamlit run content_generator_app.py --server.headless=true --server.enableCORS=false --server.enableWebsocketCompression=false --server.address=0.0.0.0"
-
-[[workflows.workflow]]
-name = "Fix Port"
-author = 40784344
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd content-generation-system && python -m streamlit run content_generator_app.py --server.port=8501 --server.headless=true --server.enableCORS=false --server.enableWebsocketCompression=false --server.address=0.0.0.0"
-
-[[ports]]
-localPort = 8080
-externalPort = 8080
 
 [[ports]]
 localPort = 8501
@@ -65,15 +25,3 @@ externalPort = 3000
 [[ports]]
 localPort = 8503
 externalPort = 3001
-
-[[ports]]
-localPort = 8504
-externalPort = 3002
-
-[[ports]]
-localPort = 8505
-externalPort = 3003
-
-[[ports]]
-localPort = 8506
-externalPort = 4200

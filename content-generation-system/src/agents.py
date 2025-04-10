@@ -4,59 +4,33 @@ from langchain_anthropic import ChatAnthropic
 from langchain.chat_models import ChatOpenAI as LangchainChatOpenAI
 from .config import LLM_MODELS, OPENAI_API_KEY, ANTHROPIC_API_KEY, validate_environment
 import os
-from typing import Dict, List, Optional, Any
 
 class AgentsFactory:
     """Factory per creare gli agenti specializzati per la generazione di contenuti."""
-
+    
     def __init__(self, config=None, logger=None):
         # Valida la presenza delle variabili d'ambiente necessarie
         validate_environment()
         self.config = config
         self.logger = logger
-
+        
         # Metriche di performance
         self.calls_per_agent = {}
         self.execution_times = {}
         self.errors_per_agent = {}
-
-    def create_agents(
-        self, 
-        web_search_tool, 
-        markdown_tool, 
-        use_economic_mode=None, 
-        provider_preference=None
-    ) -> Dict[str, Agent]:
-        """
-        Crea tutti gli agenti necessari per il sistema
-
-        Args:
-            web_search_tool: Tool per la ricerca web
-            markdown_tool: Tool per l'analisi Markdown
-            use_economic_mode: Usa modalità economica (modelli più economici)
-            provider_preference: Provider preferito ('openai', 'anthropic', 'deepseek')
-
-        Returns:
-            Dizionario con tutti gli agenti creati
-        """
-        # Se use_economic_mode non è specificato, controlla la variabile d'ambiente
-        if use_economic_mode is None:
-            use_economic_mode = os.getenv('ECONOMIC_MODE', 'false').lower() == 'true'
-
-        # Se la modalità economica è attiva, imposta DeepSeek come provider preferito
-        if use_economic_mode and not provider_preference:
-            provider_preference = "deepseek"
-
-        self.logger.info(f"Creazione agenti con modalità economica: {use_economic_mode}, provider: {provider_preference}")
-
+        
+    def create_agents(self, web_search_tool, markdown_tool):
+        """Crea gli agenti con i loro rispettivi tool."""
+        
         # Usa i parametri dalla configurazione se disponibili
         model_name = self.config.get('model_name', LLM_MODELS['openai']['default']) if self.config else LLM_MODELS['openai']['default']
-        temperature = self.config.get('temperature', 0.7) if self.config else 0.7
+        temperature = self.config.get('temperature', LLM_MODELS['openai']['temperature']['medium']) if self.config else LLM_MODELS['openai']['temperature']['medium']
         openai_api_key = self.config.get('openai_api_key', OPENAI_API_KEY) if self.config else OPENAI_API_KEY
-
+        
         # Verifica se è attiva la modalità economica
-
-
+        use_economic_mode = self.config.get('use_economic_mode', False) if self.config else False
+        provider_preference = self.config.get('provider_preference', None) if self.config else None
+        
         # Se è attiva la modalità economica, usa DeepSeek come provider principale
         if use_economic_mode and provider_preference == "deepseek":
             self.logger.info("Modalità economica attivata: utilizzo DeepSeek come provider principale")
@@ -64,7 +38,7 @@ class AgentsFactory:
             if not deepseek_api_key:
                 self.logger.warning("DEEPSEEK_API_KEY non trovata, utilizzo OpenAI come fallback")
                 use_economic_mode = False
-
+        
         # 1. Web Searcher
         if use_economic_mode and provider_preference == "deepseek":
             # Usa DeepSeek per Web Searcher in modalità economica
@@ -80,7 +54,7 @@ class AgentsFactory:
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
                 ),
-                tools=[web_search_tool] if web_search_tool else []
+                tools=[web_search_tool]
             )
         else:
             # Usa OpenAI per Web Searcher (comportamento predefinito)
@@ -95,9 +69,9 @@ class AgentsFactory:
                     model_name=model_name,
                     api_key=openai_api_key
                 ),
-                tools=[web_search_tool] if web_search_tool else []
+                tools=[web_search_tool]
             )
-
+        
         # 2. Content Architect
         if use_economic_mode and provider_preference == "deepseek":
             # Usa DeepSeek per Content Architect in modalità economica
@@ -128,7 +102,7 @@ class AgentsFactory:
                     api_key=openai_api_key
                 )
             )
-
+        
         # 3. Section Writer
         if use_economic_mode and provider_preference == "deepseek":
             # Usa DeepSeek per Section Writer in modalità economica
@@ -159,7 +133,7 @@ class AgentsFactory:
                     api_key=ANTHROPIC_API_KEY
                 )
             )
-
+        
         # 4. Copywriter
         if use_economic_mode and provider_preference == "deepseek":
             # Usa DeepSeek per Copywriter in modalità economica
@@ -190,7 +164,7 @@ class AgentsFactory:
                     api_key=ANTHROPIC_API_KEY
                 )
             )
-
+        
         # 5. Editor
         if use_economic_mode and provider_preference == "deepseek":
             # Usa DeepSeek per Editor in modalità economica
@@ -206,7 +180,7 @@ class AgentsFactory:
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
                 ),
-                tools=[markdown_tool] if markdown_tool else []
+                tools=[markdown_tool]
             )
         else:
             # Usa OpenAI per Editor (comportamento predefinito)
@@ -221,9 +195,9 @@ class AgentsFactory:
                     model_name=model_name,
                     api_key=openai_api_key
                 ),
-                tools=[markdown_tool] if markdown_tool else []
+                tools=[markdown_tool]
             )
-
+        
         # 6. Quality Reviewer
         if use_economic_mode and provider_preference == "deepseek":
             # Usa DeepSeek per Quality Reviewer in modalità economica
@@ -239,7 +213,7 @@ class AgentsFactory:
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
                 ),
-                tools=[markdown_tool] if markdown_tool else []
+                tools=[markdown_tool]
             )
         else:
             # Usa OpenAI per Quality Reviewer (comportamento predefinito)
@@ -254,9 +228,9 @@ class AgentsFactory:
                     model_name="gpt-4",  # Usa sempre GPT-4 per la qualità
                     api_key=openai_api_key
                 ),
-                tools=[markdown_tool] if markdown_tool else []
+                tools=[markdown_tool]
             )
-
+        
         agents = {
             "web_searcher": web_searcher,
             "architect": architect,
@@ -265,15 +239,15 @@ class AgentsFactory:
             "editor": editor,
             "quality_reviewer": quality_reviewer
         }
-
+        
         # Inizializza le metriche per ogni agente
         for agent_name in agents:
             self.calls_per_agent[agent_name] = 0
             self.execution_times[agent_name] = []
             self.errors_per_agent[agent_name] = 0
-
+            
         return agents
-
+        
     def get_performance_metrics(self):
         """Restituisce le metriche di performance degli agenti."""
         metrics = {
@@ -281,7 +255,7 @@ class AgentsFactory:
             "avg_execution_time": {},
             "error_rate": {}
         }
-
+        
         # Calcola tempo medio di esecuzione e tasso di errore per ogni agente
         for agent_name in self.calls_per_agent:
             if self.execution_times[agent_name]:
@@ -289,11 +263,11 @@ class AgentsFactory:
                 metrics["avg_execution_time"][agent_name] = round(avg_time, 2)
             else:
                 metrics["avg_execution_time"][agent_name] = 0
-
+                
             if self.calls_per_agent[agent_name] > 0:
                 error_rate = (self.errors_per_agent[agent_name] / self.calls_per_agent[agent_name]) * 100
                 metrics["error_rate"][agent_name] = round(error_rate, 2)
             else:
                 metrics["error_rate"][agent_name] = 0
-
+                
         return metrics

@@ -1,47 +1,56 @@
-# Configurazione dei workflow per generazione contenuti
+# Workflow configurations for content generation
+
 workflows:
   standard:
-    name: "Articolo Standard"
-    description: "Articolo di 800-1000 parole su un topic specifico"
     steps:
-      - task: "ricerca"
-        description: "Raccogliere informazioni sul topic"
-        agent: "researcher"
-      - task: "struttura"
-        description: "Definire la struttura dell'articolo"
-        agent: "architect"
-      - task: "scrittura"
-        description: "Scrivere il contenuto dell'articolo"
-        agent: "writer"
-      - task: "editing"
-        description: "Revisione e ottimizzazione del contenuto"
-        agent: "editor"
-      - task: "quality_check"
-        description: "Verifica della qualità del contenuto"
-        agent: "reviewer"
+      - task: research_and_outline
+        description: "Ricerca informazioni e creazione della struttura del contenuto"
+      - task: draft_and_edit
+        description: "Scrittura e ottimizzazione del contenuto"
+      - task: review_and_finalize
+        description: "Revisione finale e formattazione del contenuto"
+
+  extended_article:
+    steps:
+      - task: research
+        description: "Ricerca approfondita e analisi delle fonti"
+      - task: outline
+        description: "Strutturazione dettagliata dei contenuti"
+      - task: draft
+        description: "Scrittura del contenuto esteso"
+      - task: expert_review
+        description: "Revisione tecnica e verifica accuratezza"
+      - task: edit
+        description: "Editing e ottimizzazione del testo"
+      - task: finalize
+        description: "Finalizzazione e formattazione professionale"
 
   whitepaper:
-    name: "White Paper"
-    description: "White paper tecnico di 3000+ parole con contenuto approfondito"
     steps:
-      - task: "ricerca_approfondita"
-        description: "Ricerca approfondita sul topic"
-        agent: "researcher"
-      - task: "struttura_whitepaper"
-        description: "Definire la struttura del white paper"
-        agent: "architect" 
-      - task: "executive_summary"
-        description: "Scrivere la sintesi esecutiva"
-        agent: "writer"
-      - task: "sezioni_tecniche"
-        description: "Sviluppare le sezioni tecniche"
-        agent: "writer"
-      - task: "casi_studio"
-        description: "Aggiungere casi studio e esempi"
-        agent: "writer"
-      - task: "editing_avanzato"
-        description: "Revisione approfondita e formattazione"
-        agent: "editor"
-      - task: "quality_check_completo"
-        description: "Verifica completa della qualità"
-        agent: "reviewer"
+      - task: research
+        description: "Ricerca approfondita e raccolta dati"
+      - task: outline
+        description: "Strutturazione dettagliata del whitepaper"
+      - task: technical_draft
+        description: "Scrittura contenuto tecnico"
+      - task: expert_review
+        description: "Revisione tecnica approfondita"
+      - task: edit
+        description: "Editing professionale"
+      - task: design
+        description: "Formattazione e design professionale"
+      - task: finalize
+        description: "Finalizzazione e controllo qualità"
+
+  social_content:
+    steps:
+      - task: research
+        description: "Analisi trend e target audience"
+      - task: brainstorm
+        description: "Ideazione contenuti social"
+      - task: draft
+        description: "Creazione copy e contenuti"
+      - task: optimize
+        description: "Ottimizzazione per piattaforme social"
+      - task: finalize
+        description: "Finalizzazione e scheduling"
