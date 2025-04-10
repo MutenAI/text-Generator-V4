@@ -137,11 +137,13 @@ class WebSearchTool:
     
     def get_tool(self):
         """Restituisce un oggetto Tool per l'integrazione con CrewAI."""
-        return Tool(
-            name="web_search",
-            func=self.search,
-            description="Search the web for comprehensive information on a topic. Returns a structured summary of findings."
-        )
+        from langchain_core.tools import StructuredTool
+        # Utilizziamo StructuredTool che è compatibile con CrewAI e Pydantic 2.x
+        return {
+            "name": "web_search",
+            "func": self.search,
+            "description": "Search the web for comprehensive information on a topic. Returns a structured summary of findings."
+        }
 
 
 class MarkdownParserTool:
@@ -207,8 +209,10 @@ class MarkdownParserTool:
     
     def get_tool(self):
         """Restituisce un oggetto Tool per l'integrazione con CrewAI."""
-        return Tool(
-            name="markdown_reference",
-            func=self.get_content,
-            description="Get content from the reference markdown file. Optionally specify a section name to get only that part."
-        )
+        # Restituiamo un dizionario di configurazione dello strumento
+        # che è compatibile con Pydantic 2.x e CrewAI
+        return {
+            "name": "markdown_reference",
+            "func": self.get_content,
+            "description": "Get content from the reference markdown file. Optionally specify a section name to get only that part."
+        }
