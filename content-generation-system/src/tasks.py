@@ -90,12 +90,12 @@ class WorkflowManager:
 
         # Task 3: Final Review + Optimization
         review_finalize_task = Task(
-            description=f"Review and finalize the article about '{topic}' following these steps:\n\n1. Use the MarkdownParserTool to extract brand guidelines from the reference file.\n2. Review and optimize the content based on:\n   - Factual accuracy against the research summary\n   - Alignment with brand voice and style guidelines\n   - Content structure and logical flow\n   - Quality and engagement level\n   - Technical accuracy\n3. Make all necessary improvements and generate the final output:\n   - Apply corrections for any inaccuracies\n   - Enhance flow and transitions where needed\n   - Adjust tone and style to match brand guidelines\n   - Ensure the article maintains its target length (800-1000 words)\n   - Format according to markdown standards\n\nThe final output should be the complete, publication-ready article.",
-            expected_output="The final, publication-ready article in markdown format, incorporating all necessary improvements and aligned with brand guidelines.",
+            description=f"Review and finalize the article about '{topic}' following these steps:\n\n1. If a markdown tool is available, use it to extract brand guidelines from the reference file.\n2. Review and optimize the content based on:\n   - Factual accuracy against the research summary\n   - Alignment with brand voice and style guidelines (if available)\n   - Content structure and logical flow\n   - Quality and engagement level\n   - Technical accuracy\n3. Make all necessary improvements and generate the final output:\n   - Apply corrections for any inaccuracies\n   - Enhance flow and transitions where needed\n   - Adjust tone and style to match brand guidelines (if available)\n   - Ensure the article maintains its target length (800-1000 words)\n   - Format according to markdown standards\n\nIMPORTANT: The final output MUST be the complete, publication-ready article, not just a comment or status update.",
+            expected_output="The final, publication-ready article in markdown format, incorporating all necessary improvements.",
             agent=self.agents["editor"],  # L'editor si occupa sia della revisione che della finalizzazione
             async_execution=False,
             dependencies=[writing_editing_task],
-            tools=[self.agents["editor"].tools[0]]  # Assicuriamo che lo strumento markdown sia disponibile
+            tools=[self.agents["editor"].tools[0]] if len(self.agents["editor"].tools) > 0 else []  # Aggiungi lo strumento markdown solo se disponibile
         )
 
         tasks = [research_outline_task, writing_editing_task]

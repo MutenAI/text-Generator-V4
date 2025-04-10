@@ -86,6 +86,15 @@ mode = "sequential"
 task = "shell.exec"
 args = "cd content-generation-system && bash run-streamlit-debug.sh"
 
+[[workflows.workflow]]
+name = "Test Editor Fix"
+author = 40784344
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd content-generation-system && bash run-editor-test.sh"
+
 [[ports]]
 localPort = 8080
 externalPort = 8080

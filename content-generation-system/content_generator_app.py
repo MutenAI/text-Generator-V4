@@ -253,7 +253,11 @@ if generate_button:
                 # Mostra i passi del workflow
                 for step in workflow_steps:
                     st.write(f"- {step['task']}: {step['description']}")
-
+                
+                # Verifica se il file di riferimento esiste
+                if markdown_tool is None and reference_file:
+                    st.warning(f"⚠️ Attenzione: File di riferimento '{reference_file}' non trovato o non accessibile. Il controllo dell'aderenza al brand potrebbe essere compromesso.")
+                
                 st.write(f"📋 Creazione task per workflow {content_type}...")
                 tasks = workflow_manager.create_tasks(topic, content_type)
 

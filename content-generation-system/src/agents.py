@@ -186,8 +186,8 @@ class AgentsFactory:
             # Usa OpenAI per Editor (comportamento predefinito)
             editor = Agent(
                 role="Content Editor and Brand Aligner",
-                goal="Optimize content to match brand voice and style from reference documents",
-                backstory="You are an expert editor who ensures content aligns perfectly with brand guidelines.",
+                goal="Optimize content to match brand voice and style and deliver complete, publication-ready articles",
+                backstory="You are an expert editor who ensures content is of high quality, well-structured, and aligns with brand guidelines when available. Your primary responsibility is to return the complete, polished article.",
                 verbose=True,
                 process_type='sequential',
                 llm=ChatOpenAI(
