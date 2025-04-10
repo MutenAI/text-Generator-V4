@@ -51,7 +51,7 @@ class AgentsFactory:
 
         # Usa i parametri dalla configurazione se disponibili
         model_name = self.config.get('model_name', LLM_MODELS['openai']['default']) if self.config else LLM_MODELS['openai']['default']
-        temperature = self.config.get('temperature', LLM_MODELS['openai']['temperature']['medium']) if self.config else LLM_MODELS['openai']['temperature']['medium']
+        temperature = self.config.get('temperature', 0.7) if self.config else 0.7
         openai_api_key = self.config.get('openai_api_key', OPENAI_API_KEY) if self.config else OPENAI_API_KEY
 
         # Verifica se è attiva la modalità economica
