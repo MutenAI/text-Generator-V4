@@ -138,8 +138,8 @@ class WebSearchTool:
     def get_tool(self):
         """Restituisce un oggetto BaseTool per l'integrazione con CrewAI."""
         class WebSearchCrewAITool(BaseTool):
-            name = "web_search"
-            description = "Search the web for comprehensive information on a topic. Returns a structured summary of findings."
+            name: str = "web_search"
+            description: str = "Search the web for comprehensive information on a topic. Returns a structured summary of findings."
             
             def _run(self, query: str):
                 return self.search_func(query)
@@ -213,8 +213,8 @@ class MarkdownParserTool:
     def get_tool(self):
         """Restituisce un oggetto BaseTool per l'integrazione con CrewAI."""
         class MarkdownReferenceCrewAITool(BaseTool):
-            name = "markdown_reference"
-            description = "Get content from the reference markdown file. Optionally specify a section name to get only that part."
+            name: str = "markdown_reference"
+            description: str = "Get content from the reference markdown file. Optionally specify a section name to get only that part."
             
             def _run(self, section=None):
                 return self.get_content_func(section)
