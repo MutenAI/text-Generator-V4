@@ -68,6 +68,15 @@ mode = "sequential"
 task = "shell.exec"
 args = "cd content-generation-system && bash run-streamlit.sh"
 
+[[workflows.workflow]]
+name = "Debug Content Generator"
+author = 40784344
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd content-generation-system && bash run-streamlit-debug.sh"
+
 [[ports]]
 localPort = 8080
 externalPort = 8080
