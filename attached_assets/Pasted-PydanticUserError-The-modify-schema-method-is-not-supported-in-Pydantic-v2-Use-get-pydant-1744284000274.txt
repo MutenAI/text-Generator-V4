@@ -1,0 +1,61 @@
+PydanticUserError: The `__modify_schema__` method is not supported in Pydantic v2. Use `__get_pydantic_json_schema__` instead in class `SecretStr`. For further information visit https://errors.pydantic.dev/2.11/u/custom-json-schema
+Traceback:
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 542, in _run_script
+    exec(code, module.__dict__)
+File "/home/runner/workspace/content-generation-system/content_generator_app.py", line 16, in <module>
+    from src.agents import AgentsFactory
+File "/home/runner/workspace/content-generation-system/src/agents.py", line 3, in <module>
+    from langchain_anthropic import ChatAnthropic
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/langchain_anthropic/__init__.py", line 1, in <module>
+    from langchain_anthropic.chat_models import ChatAnthropic, ChatAnthropicMessages
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/langchain_anthropic/chat_models.py", line 239, in <module>
+    class ChatAnthropic(BaseChatModel):
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_model_construction.py", line 237, in __new__
+    complete_model_class(
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_model_construction.py", line 597, in complete_model_class
+    schema = gen_schema.generate_schema(cls)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 706, in generate_schema
+    schema = self._generate_schema_inner(obj)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 984, in _generate_schema_inner
+    return self._model_schema(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 817, in _model_schema
+    {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 817, in <dictcomp>
+    {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 1186, in _generate_md_field_schema
+    common_field = self._common_field_schema(name, field_info, decorators)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 1352, in _common_field_schema
+    schema = self._apply_annotations(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 2264, in _apply_annotations
+    schema = get_inner_schema(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_schema_generation_shared.py", line 83, in __call__
+    schema = self._handler(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 2246, in inner_handler
+    schema = self._generate_schema_inner(obj)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 989, in _generate_schema_inner
+    return self.match_type(obj)
+           ^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 1103, in match_type
+    return self._match_generic_type(obj, origin)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 1126, in _match_generic_type
+    return self._union_schema(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 1414, in _union_schema
+    choices.append(self.generate_schema(arg))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 708, in generate_schema
+    metadata_js_function = _extract_get_pydantic_json_schema(obj)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 2608, in _extract_get_pydantic_json_schema
+    raise PydanticUserError(
