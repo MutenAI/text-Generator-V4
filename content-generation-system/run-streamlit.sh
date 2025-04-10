@@ -6,7 +6,7 @@ echo "Checking for running Streamlit processes..."
 ps aux | grep streamlit | grep -v grep
 
 echo "Killing any existing Streamlit processes..."
-pkill -f "streamlit run"
+pkill -f "streamlit run" || true
 
 echo "Starting Streamlit app on port 8501..."
 python -m streamlit run content_generator_app.py \
@@ -17,6 +17,3 @@ python -m streamlit run content_generator_app.py \
   --server.address=0.0.0.0 \
   --browser.serverAddress=0.0.0.0 \
   --browser.gatherUsageStats=false
-
-# Note: This script doesn't use background process or logging to file
-# so you can see the output directly in the console
