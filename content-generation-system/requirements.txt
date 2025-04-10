@@ -1,11 +1,12 @@
 python-dotenv==1.0.0
 crewai==0.19.0
-langchain>=0.1.10,<0.2.0
+langchain>=0.0.335
 langchain_openai>=0.0.5
-langchain_anthropic>=0.1.1
+langchain_anthropic>=0.0.10
 requests==2.31.0
 streamlit==1.32.0
-pydantic>=1.10.8
+pydantic==1.10.13
 pyyaml==6.0.1
 diskcache>=5.4.0
 funcy>=1.17.0
+langchain-core>=0.0.25
