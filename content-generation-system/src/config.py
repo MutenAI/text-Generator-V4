@@ -30,7 +30,7 @@ LLM_MODELS = {
         }
     },
     'deepseek': {
-        'default': 'deepseek-chat',
+        'default': 'deepseek/deepseek-chat',
         'temperature': {
             'low': 0.0,
             'medium': 0.2,
