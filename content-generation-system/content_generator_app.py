@@ -41,6 +41,12 @@ st.set_page_config(
     layout="wide"
 )
 
+# Forza l'uso di impostazioni server specifiche
+import os
+os.environ['STREAMLIT_SERVER_PORT'] = '8501'
+os.environ['STREAMLIT_SERVER_HEADLESS'] = 'true'
+os.environ['STREAMLIT_SERVER_ADDRESS'] = '0.0.0.0'
+
 st.title("🤖 Content Generator con CrewAI")
 st.subheader("Genera contenuti di alta qualità utilizzando agenti AI specializzati")
 
@@ -155,9 +161,19 @@ with st.form("generation_form"):
     with col2:
         # Selezione workflow
         if config_file:
-            with open(config_file, 'r') as f:
-                config_data = yaml.safe_load(f)
-            workflows = list(config_data.get('workflows', {}).keys())
+            try:
+                with open(config_file, 'r') as f:
+                    config_data = yaml.safe_load(f)
+                if not config_data or 'workflows' not in config_data:
+                    st.error(f"Il file di configurazione '{config_file}' non contiene una sezione 'workflows' valida.")
+                    st.info("Controlla il file per assicurarti che abbia il formato corretto.")
+                    workflows = []
+                else:
+                    workflows = list(config_data.get('workflows', {}).keys())
+                    st.success(f"Caricati {len(workflows)} workflow dal file di configurazione.")
+            except Exception as e:
+                st.error(f"Errore durante il caricamento del file di configurazione: {str(e)}")
+                workflows = []
             workflow_labels = {
                 'standard': 'Articolo Standard',
                 'whitepaper': 'White Paper (3000+ parole)'
