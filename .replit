@@ -95,6 +95,15 @@ mode = "sequential"
 task = "shell.exec"
 args = "cd content-generation-system && bash run-editor-test.sh"
 
+[[workflows.workflow]]
+name = "Test Parser MD"
+author = 40784344
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd content-generation-system && python reference_test.py --file reference/siebert-system-brief-optimized.md --section \"brand guidelines\""
+
 [[ports]]
 localPort = 8080
 externalPort = 8080

@@ -178,27 +178,50 @@ class MarkdownParserTool:
             # Parsing semplice per trovare sezioni nel markdown
             import re
             
-            # Cerca sezioni di livello 2 (##)
-            pattern = rf"## {re.escape(section)}(.*?)(?=\n## |\Z)"
-            match = re.search(pattern, content, re.DOTALL)
+            # Se richiesta è "brand guidelines", cerchiamo anche "Brand Voice" come fallback
+            section_alternatives = [section]
+            if section.lower() == "brand guidelines":
+                section_alternatives.extend(["Brand Voice", "brand voice", "Style Guide"])
             
-            if match:
-                result = f"## {section}{match.group(1)}"
-                logger.info(f"Trovata sezione '{section}' di livello 2")
-                return result
+            # Cerca con corrispondenza esatta e poi con ricerca parziale
+            for current_section in section_alternatives:
+                # Cerca sezioni di livello 2 (##) con corrispondenza esatta
+                pattern = rf"## {re.escape(current_section)}(.*?)(?=\n## |\Z)"
+                match = re.search(pattern, content, re.DOTALL)
+                
+                if match:
+                    result = f"## {current_section}{match.group(1)}"
+                    logger.info(f"Trovata sezione '{current_section}' di livello 2")
+                    return result
+                
+                # Cerca sezioni di livello 3 (###) con corrispondenza esatta
+                pattern = rf"### {re.escape(current_section)}(.*?)(?=\n### |\n## |\Z)"
+                match = re.search(pattern, content, re.DOTALL)
+                
+                if match:
+                    result = f"### {current_section}{match.group(1)}"
+                    logger.info(f"Trovata sezione '{current_section}' di livello 3")
+                    return result
             
-            # Cerca sezioni di livello 3 (###)
-            pattern = rf"### {re.escape(section)}(.*?)(?=\n### |\n## |\Z)"
-            match = re.search(pattern, content, re.DOTALL)
+            # Ricerca parziale - cerca sezioni che contengano il termine
+            search_term = section.lower()
+            all_sections = re.findall(r"(#+)\s+(.+)$", content, re.MULTILINE)
             
-            if match:
-                result = f"### {section}{match.group(1)}"
-                logger.info(f"Trovata sezione '{section}' di livello 3")
-                return result
+            for heading_marks, heading_text in all_sections:
+                if search_term in heading_text.lower():
+                    # Ha trovato un titolo che contiene il termine cercato
+                    logger.info(f"Trovata sezione simile: '{heading_text}'")
+                    
+                    # Estrai il contenuto di questa sezione
+                    pattern = rf"{re.escape(heading_marks)} {re.escape(heading_text)}(.*?)(?=\n{re.escape(heading_marks[0])} |\Z)"
+                    section_match = re.search(pattern, content, re.DOTALL)
+                    
+                    if section_match:
+                        return f"{heading_marks} {heading_text}{section_match.group(1)}"
             
-            logger.warning(f"Sezione '{section}' non trovata nel documento")
-            return f"Nota: La sezione '{section}' non è stata trovata nel documento. "  \
-                   f"Verifica il nome della sezione o consulta il documento completo."
+            # Se non trova nulla, restituisci l'intero documento come fallback
+            logger.warning(f"Sezione '{section}' non trovata nel documento, restituisco l'intero documento")
+            return f"Nota: La sezione '{section}' non è stata trovata nel documento. Di seguito l'intero documento:\n\n{content}"
         
         except FileNotFoundError as e:
             logger.error(f"File non trovato: {str(e)}")
