@@ -2,7 +2,7 @@ from crewai import Agent
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain.chat_models import ChatOpenAI as LangchainChatOpenAI
-from langchain.tools import BaseTool, Tool
+from langchain.tools import Tool
 from .config import LLM_MODELS, OPENAI_API_KEY, ANTHROPIC_API_KEY, validate_environment
 import os
 from typing import Dict, List, Optional, Any
