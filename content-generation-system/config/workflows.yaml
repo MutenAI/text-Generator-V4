@@ -6,34 +6,40 @@ workflows:
     steps:
       - task: research_and_outline
         description: "Ricerca informazioni e creazione della struttura del contenuto"
+        complexity: "medium"
+        provider_preference: "auto" # Auto sceglie tra modalità normale e economica
       - task: draft_and_edit
         description: "Scrittura e ottimizzazione del contenuto"
+        complexity: "medium" 
+        provider_preference: "auto"
       - task: review_and_finalize
         description: "Revisione finale e formattazione del contenuto"
+        complexity: "low"
+        provider_preference: "auto"
 
   whitepaper:
     steps:
       - task: research_and_analysis
         description: "Ricerca approfondita sul mercato e analisi delle esigenze specifiche del settore target"
         complexity: "high"
-        provider_preference: "anthropic"
-
+        provider_preference: "auto" # Auto sceglie tra OpenAI/Anthropic e DeepSeek
+        
       - task: outline_and_structure
         description: "Creazione della struttura dettagliata del white paper e definizione delle sezioni chiave"
         complexity: "medium"
-        provider_preference: "openai"
-
+        provider_preference: "auto"
+        
       - task: content_development
         description: "Sviluppo dei contenuti principali di ciascuna sezione del white paper"
         complexity: "high"
-        provider_preference: "anthropic"
-
+        provider_preference: "auto"
+        
       - task: expert_review_and_edit
         description: "Revisione tecnica e ottimizzazione del contenuto per coerenza e qualità"
         complexity: "high"
-        provider_preference: "openai"
-
+        provider_preference: "auto"
+        
       - task: visual_planning_and_finalize
         description: "Pianificazione degli elementi visivi e finalizzazione del documento con note per il designer"
         complexity: "high"
-        provider_preference: "anthropic"
+        provider_preference: "auto"

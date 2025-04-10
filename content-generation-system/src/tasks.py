@@ -1,5 +1,7 @@
+import os
 from crewai import Task
 import logging
+from typing import Dict, Any, List, Optional
 
 class WorkflowManager:
     """Gestisce i diversi flussi di lavoro per la generazione dei contenuti."""
@@ -245,3 +247,110 @@ class WorkflowManager:
 
         return [research_analysis_task, outline_structure_task, content_development_task, 
                 expert_review_edit_task, visual_planning_finalize_task]
+
+    def create_tasks_from_config(self, topic: str, workflow_config: Dict[str, Any]) -> List[Task]:
+        """Crea i task basati sulla configurazione del workflow."""
+        if not workflow_config or "steps" not in workflow_config:
+            self.logger.error("Configurazione workflow non valida")
+            return []
+
+        steps = workflow_config["steps"]
+        tasks = []
+
+        # Verifica se la modalità economica è attiva
+        economic_mode = os.getenv('ECONOMIC_MODE', 'false').lower() == 'true'
+        if economic_mode:
+            self.logger.info("Creazione tasks in modalità economica (DeepSeek)")
+
+        for step in steps:
+            task_name = step.get("task", "")
+            description = step.get("description", "")
+
+            # Ottieni le preferenze di provider e complessità
+            provider_preference = step.get("provider_preference", "auto")
+            complexity = step.get("complexity", "medium")
+
+            # Se provider_preference è "auto", determina in base alla modalità
+            if provider_preference == "auto" and economic_mode:
+                provider_preference = "deepseek"
+
+            # Crea il task appropriato in base al nome con le preferenze
+            task = self._create_task_by_name(
+                task_name, 
+                topic, 
+                description, 
+                provider_preference=provider_preference, 
+                complexity=complexity
+            )
+            if task:
+                tasks.append(task)
+
+        return tasks
+
+    def _create_task_by_name(
+            self, 
+            task_name: str, 
+            topic: str, 
+            description: str, 
+            provider_preference: str = None, 
+            complexity: str = "medium"
+        ) -> Optional[Task]:
+        """Crea un task specifico in base al nome.
+
+        Args:
+            task_name: Nome del task
+            topic: Argomento del contenuto
+            description: Descrizione del task
+            provider_preference: Provider preferito (openai, anthropic, deepseek)
+            complexity: Complessità del task (high, medium, low)
+        """
+        # Tieni traccia dei parametri per ogni task
+        extra_params = {
+            "provider_preference": provider_preference,
+            "complexity": complexity
+        }
+
+        try:
+            if task_name == "research":
+                return self._create_research_task(topic, **extra_params)
+            elif task_name == "outline":
+                return self._create_outline_task(topic, **extra_params)
+            elif task_name == "draft":
+                return self._create_draft_task(topic, **extra_params)
+            elif task_name == "review":
+                return self._create_review_task(topic, **extra_params)
+            elif task_name == "edit":
+                return self._create_edit_task(topic, **extra_params)
+            elif task_name == "finalize":
+                return self._create_finalize_task(topic, **extra_params)
+            else:
+                return None # Handle unknown task names
+
+        except Exception as e:
+            self.logger.error(f"Errore durante la creazione del task '{task_name}': {e}")
+            return None
+
+    # Placeholder functions -  Replace with your actual task creation logic
+    def _create_research_task(self, topic: str, **kwargs) -> Optional[Task]:
+        description = f"Research task for '{topic}' with provider preference {kwargs.get('provider_preference', 'auto')} and complexity {kwargs.get('complexity','medium')}"
+        return Task(description=description, agent=self.agents["web_searcher"])
+
+    def _create_outline_task(self, topic: str, **kwargs) -> Optional[Task]:
+        description = f"Outline task for '{topic}' with provider preference {kwargs.get('provider_preference', 'auto')} and complexity {kwargs.get('complexity','medium')}"
+        return Task(description=description, agent=self.agents["architect"])
+
+    def _create_draft_task(self, topic: str, **kwargs) -> Optional[Task]:
+        description = f"Draft task for '{topic}' with provider preference {kwargs.get('provider_preference', 'auto')} and complexity {kwargs.get('complexity','medium')}"
+        return Task(description=description, agent=self.agents["copywriter"])
+
+    def _create_review_task(self, topic: str, **kwargs) -> Optional[Task]:
+        description = f"Review task for '{topic}' with provider preference {kwargs.get('provider_preference', 'auto')} and complexity {kwargs.get('complexity','medium')}"
+        return Task(description=description, agent=self.agents["editor"])
+
+    def _create_edit_task(self, topic: str, **kwargs) -> Optional[Task]:
+        description = f"Edit task for '{topic}' with provider preference {kwargs.get('provider_preference', 'auto')} and complexity {kwargs.get('complexity','medium')}"
+        return Task(description=description, agent=self.agents["editor"])
+
+    def _create_finalize_task(self, topic: str, **kwargs) -> Optional[Task]:
+        description = f"Finalize task for '{topic}' with provider preference {kwargs.get('provider_preference', 'auto')} and complexity {kwargs.get('complexity','medium')}"
+        return Task(description=description, agent=self.agents["editor"])

@@ -15,27 +15,27 @@ SERPER_API_KEY = os.getenv('SERPER_API_KEY')
 LLM_MODELS = {
     'openai': {
         'default': 'gpt-4',
-        'temperature': {
-            'low': 0.0,
-            'medium': 0.2,
-            'high': 0.7
-        }
+        'powerful': 'gpt-4',
+        'balanced': 'gpt-4',
+        'economic': 'gpt-3.5-turbo'
     },
     'anthropic': {
-        'default': 'claude-3-opus-20240229',
-        'temperature': {
-            'low': 0.0,
-            'medium': 0.2,
-            'high': 0.7
-        }
+        'default': 'claude-3-sonnet-20240229',
+        'powerful': 'claude-3-opus-20240229',
+        'balanced': 'claude-3-sonnet-20240229',
+        'economic': 'claude-3-haiku-20240307'
     },
     'deepseek': {
-        'default': 'deepseek-chat',
-        'temperature': {
-            'low': 0.0,
-            'medium': 0.2,
-            'high': 0.7
-        }
+        'default': 'deepseek-coder',
+        'powerful': 'deepseek-chat',
+        'balanced': 'deepseek-coder',
+        'economic': 'deepseek-lite'
+    },
+    'cohere': {
+        'default': 'command-r-plus',
+        'powerful': 'command-r-plus',
+        'balanced': 'command-r',
+        'economic': 'command'
     }
 }
 
@@ -51,11 +51,11 @@ def validate_environment():
         'ANTHROPIC_API_KEY': ANTHROPIC_API_KEY,
         'SERPER_API_KEY': SERPER_API_KEY
     }
-    
+
     for var_name, var_value in required_vars.items():
         if not var_value:
             missing_vars.append(var_name)
-    
+
     if missing_vars:
         raise EnvironmentError(
             f"Variabili d'ambiente mancanti: {', '.join(missing_vars)}. "

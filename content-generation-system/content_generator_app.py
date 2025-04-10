@@ -154,19 +154,35 @@ with st.form("generation_form"):
 
     with col2:
         # Selezione workflow
-        workflow_types = {
-            "standard": "Articolo Standard (800-1000 parole)",
-            "extended_article": "Articolo Esteso (1500+ parole)",
-            "whitepaper": "White Paper (3000+ parole)",
-            "social_content": "Social Media Content Pack"
-        }
+        if config_file:
+            with open(config_file, 'r') as f:
+                config_data = yaml.safe_load(f)
+            workflows = list(config_data.get('workflows', {}).keys())
+            workflow_labels = {
+                'standard': 'Articolo Standard',
+                'whitepaper': 'White Paper (3000+ parole)'
+            }
 
-        content_type = st.selectbox(
-            "Tipo di contenuto",
-            options=list(workflow_types.keys()),
-            format_func=lambda x: workflow_types[x],
-            help="Seleziona il tipo di contenuto da generare"
-        )
+            # Crea una lista di opzioni in formato leggibile
+            workflow_options = [workflow_labels.get(w, w.replace('_', ' ').title()) for w in workflows]
+            selected_display = st.selectbox("Tipo di contenuto", workflow_options)
+
+            # Mappa l'opzione selezionata al nome originale del workflow
+            reverse_mapping = {v: k for k, v in workflow_labels.items()}
+            selected_workflow = reverse_mapping.get(selected_display, workflows[workflow_options.index(selected_display)])
+        else:
+            selected_workflow = None
+
+    # Aggiunta dell'opzione per la modalità economica
+    economic_mode = st.checkbox("Modalità economica (DeepSeek)", 
+                               value=os.getenv('ECONOMIC_MODE', 'false').lower() == 'true',
+                               help="Utilizza DeepSeek come provider principale per ridurre i costi")
+
+    # Aggiorna la variabile d'ambiente in base alla selezione
+    if economic_mode:
+        os.environ['ECONOMIC_MODE'] = 'true'
+    else:
+        os.environ['ECONOMIC_MODE'] = 'false'
 
     # Pulsante di generazione
     generate_button = st.form_submit_button("🚀 Genera Contenuto")
@@ -177,6 +193,8 @@ if generate_button:
         st.error("Per favore inserisci un topic per la generazione.")
     elif not config_file or not os.path.exists(config_file):
         st.error("File di configurazione non trovato.")
+    elif not selected_workflow:
+        st.error("Seleziona un tipo di contenuto valido.")
     else:
         try:
             # Mostra il pannello di generazione
@@ -212,7 +230,7 @@ if generate_button:
                 st.write("🤖 Creazione agenti specializzati...")
 
                 # Applica modalità economica se selezionata
-                if use_deepseek_mode:
+                if use_deepseek_mode or economic_mode:
                     st.write("💰 Modalità economica (DeepSeek) attivata")
                     config_dict = config.dict()
                     config_dict["provider_preference"] = "deepseek"
@@ -241,23 +259,23 @@ if generate_button:
                 output_filename = generate_output_filename(topic, output_dir)
 
                 # Ottieni i task per il workflow specificato
-                if not config.workflows or content_type not in config.workflows:
-                    st.error(f"Workflow '{content_type}' non trovato nella configurazione. Verificare il file workflows.yaml.")
+                if not config.workflows or selected_workflow not in config.workflows:
+                    st.error(f"Workflow '{selected_workflow}' non trovato nella configurazione. Verificare il file workflows.yaml.")
                     st.stop()
 
-                workflow_steps = config.workflows[content_type]['steps']
-                st.write(f"📋 Workflow selezionato: {workflow_types[content_type]}")
+                workflow_steps = config.workflows[selected_workflow]['steps']
+                st.write(f"📋 Workflow selezionato: {workflow_labels.get(selected_workflow, selected_workflow.replace('_', ' ').title())}")
                 st.write(f"🔄 Passi da eseguire: {len(workflow_steps)}")
 
                 # Mostra i passi del workflow
                 for step in workflow_steps:
                     st.write(f"- {step['task']}: {step['description']}")
 
-                st.write(f"📋 Creazione task per workflow {content_type}...")
-                tasks = workflow_manager.create_tasks(topic, content_type)
+                st.write(f"📋 Creazione task per workflow {selected_workflow}...")
+                tasks = workflow_manager.create_tasks(topic, selected_workflow)
 
                 if not tasks:
-                    st.error(f"Nessun task generato per il tipo di contenuto: {content_type}")
+                    st.error(f"Nessun task generato per il tipo di contenuto: {selected_workflow}")
                     st.stop()
 
                 st.write(f"✅ Creati {len(tasks)} task per il workflow")
@@ -337,7 +355,7 @@ if generate_button:
             with tab2:
                 st.markdown("## Dettagli di Generazione")
                 st.write(f"**Topic:** {topic}")
-                st.write(f"**Tipo di contenuto:** {workflow_types[content_type]}")
+                st.write(f"**Tipo di contenuto:** {workflow_labels.get(selected_workflow, selected_workflow.replace('_', ' ').title())}")
                 st.write(f"**Reference file:** {reference_file or 'Nessuno'}")
                 st.write(f"**Numero di task:** {len(tasks)}")
                 st.write(f"**Tempo di esecuzione:** {execution_time:.2f} secondi")
