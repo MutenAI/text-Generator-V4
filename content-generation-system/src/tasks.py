@@ -13,9 +13,7 @@ class WorkflowManager:
     def create_tasks(self, topic, content_type="article"):
         """Crea la sequenza di task appropriata in base al tipo di contenuto."""
         if content_type == "whitepaper":
-            return self._create_extended_workflow(topic)
-        elif content_type == "extended_article":
-            return self._create_extended_article_workflow(topic)
+            return self._create_whitepaper_workflow(topic)
         return self._create_standard_workflow(topic)
 
     def _create_standard_workflow(self, topic):
@@ -167,3 +165,83 @@ class WorkflowManager:
         )
 
         return [research_task, architecture_task] + section_tasks + [editing_task]
+    def _create_whitepaper_workflow(self, topic):
+        """Crea il flusso di lavoro ottimizzato per white paper."""
+        # Task 1: Ricerca e Analisi
+        research_analysis_task = Task(
+            description=f"Conduci una ricerca approfondita e analisi su '{topic}'. Focalizzati su:\n\n"
+                       f"1. Analisi del mercato attuale e tendenze future\n"
+                       f"2. Problematiche specifiche del settore target\n"
+                       f"3. Soluzioni esistenti e loro limiti\n"
+                       f"4. Opportunità di innovazione\n"
+                       f"5. Statistiche rilevanti e dati di supporto\n\n"
+                       f"Organizza i risultati in formato JSON con: 'market_analysis', 'industry_challenges', "
+                       f"'existing_solutions', 'innovation_opportunities', 'key_statistics'.",
+            expected_output="Un documento JSON strutturato con analisi di mercato, sfide del settore, soluzioni esistenti, opportunità di innovazione e statistiche chiave.",
+            agent=self.agents["web_searcher"],
+            async_execution=False
+        )
+
+        # Task 2: Struttura e Outline
+        outline_structure_task = Task(
+            description=f"Crea una struttura dettagliata per un white paper su '{topic}' basandoti sull'analisi di mercato. Sviluppa:\n\n"
+                       f"1. Un titolo accattivante e sottotitolo esplicativo\n"
+                       f"2. Sommario esecutivo (max 250 parole)\n"
+                       f"3. Struttura dettagliata con sezioni e sottosezioni (5-7 sezioni principali)\n"
+                       f"4. Per ogni sezione: titolo, obiettivo, punti chiave da sviluppare (3-5 per sezione)\n"
+                       f"5. Allocazione della lunghezza stimata per ogni sezione\n\n"
+                       f"La struttura deve guidare il lettore logicamente dalle problematiche alle soluzioni.",
+            expected_output="Una struttura dettagliata del white paper in formato markdown con titolo, sommario esecutivo, sezioni complete di sottosezioni e punti chiave.",
+            agent=self.agents["architect"],
+            async_execution=False,
+            dependencies=[research_analysis_task]
+        )
+
+        # Task 3: Sviluppo Contenuti
+        content_development_task = Task(
+            description=f"Sviluppa il contenuto completo del white paper su '{topic}' seguendo la struttura fornita. Assicurati di:\n\n"
+                       f"1. Elaborare ogni sezione con contenuto sostanziale e approfondito\n"
+                       f"2. Incorporare dati e statistiche dall'analisi di mercato\n"
+                       f"3. Fornire esempi concreti e casi studio rilevanti\n"
+                       f"4. Mantenere uno stile professionale ma accessibile\n"
+                       f"5. Sviluppare argomentazioni solide supportate da evidenze\n\n"
+                       f"Il contenuto deve risultare autorevole, informativo e orientato alle soluzioni.",
+            expected_output="Contenuto completo del white paper in formato markdown, strutturato secondo l'outline e arricchito con dati, statistiche ed esempi.",
+            agent=self.agents["section_writer"],
+            async_execution=False,
+            dependencies=[outline_structure_task]
+        )
+
+        # Task 4: Revisione Tecnica e Editing
+        expert_review_edit_task = Task(
+            description=f"Esegui una revisione tecnica approfondita e ottimizza il white paper su '{topic}'. Concentrati su:\n\n"
+                       f"1. Accuratezza tecnica e fattuale di tutti i contenuti\n"
+                       f"2. Coerenza del tono e dello stile in tutto il documento\n"
+                       f"3. Chiarezza dell'argomentazione e flusso logico\n"
+                       f"4. Ottimizzazione della struttura delle frasi e scelta delle parole\n"
+                       f"5. Verificare che tutte le affermazioni siano supportate da evidenze\n\n"
+                       f"Utilizza gli strumenti di editing per garantire un documento di qualità professionale.",
+            expected_output="White paper rivisto e ottimizzato, con correzioni tecniche, miglioramenti stilistici e strutturali in formato markdown.",
+            agent=self.agents["editor"],
+            async_execution=False,
+            dependencies=[content_development_task],
+            tools=[self.agents["editor"].tools[0]]  # Markdown parser tool
+        )
+
+        # Task 5: Pianificazione Visiva e Finalizzazione
+        visual_planning_finalize_task = Task(
+            description=f"Finalizza il white paper su '{topic}' e fornisci note per elementi visivi. Completa:\n\n"
+                       f"1. Aggiungi annotazioni per grafici, diagrammi o infografiche da includere\n"
+                       f"2. Suggerisci posizionamento di elementi visivi con descrizioni dettagliate\n"
+                       f"3. Ottimizza la formattazione markdown per la leggibilità\n"
+                       f"4. Aggiungi note per il design della copertina e delle pagine interne\n"
+                       f"5. Inserisci riferimenti e citazioni in formato appropriato\n\n"
+                       f"Il documento finale deve essere pronto per la consegna al team di design grafico.",
+            expected_output="White paper finalizzato con annotazioni per elementi visivi, suggerimenti di design, formattazione ottimizzata e riferimenti completi.",
+            agent=self.agents["quality_reviewer"],
+            async_execution=False,
+            dependencies=[expert_review_edit_task]
+        )
+
+        return [research_analysis_task, outline_structure_task, content_development_task, 
+                expert_review_edit_task, visual_planning_finalize_task]

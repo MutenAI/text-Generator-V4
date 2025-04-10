@@ -10,47 +10,29 @@ workflows:
       - task: review_and_finalize
         description: "Revisione finale e formattazione del contenuto"
 
-  extended_article:
-    steps:
-      - task: research
-        description: "Ricerca approfondita e analisi delle fonti"
-      - task: outline
-        description: "Strutturazione dettagliata dei contenuti"
-      - task: draft
-        description: "Scrittura del contenuto esteso"
-      - task: expert_review
-        description: "Revisione tecnica e verifica accuratezza"
-      - task: edit
-        description: "Editing e ottimizzazione del testo"
-      - task: finalize
-        description: "Finalizzazione e formattazione professionale"
-
   whitepaper:
     steps:
-      - task: research
-        description: "Ricerca approfondita e raccolta dati"
-      - task: outline
-        description: "Strutturazione dettagliata del whitepaper"
-      - task: technical_draft
-        description: "Scrittura contenuto tecnico"
-      - task: expert_review
-        description: "Revisione tecnica approfondita"
-      - task: edit
-        description: "Editing professionale"
-      - task: design
-        description: "Formattazione e design professionale"
-      - task: finalize
-        description: "Finalizzazione e controllo qualità"
+      - task: research_and_analysis
+        description: "Ricerca approfondita sul mercato e analisi delle esigenze specifiche del settore target"
+        complexity: "high"
+        provider_preference: "anthropic"
 
-  social_content:
-    steps:
-      - task: research
-        description: "Analisi trend e target audience"
-      - task: brainstorm
-        description: "Ideazione contenuti social"
-      - task: draft
-        description: "Creazione copy e contenuti"
-      - task: optimize
-        description: "Ottimizzazione per piattaforme social"
-      - task: finalize
-        description: "Finalizzazione e scheduling"
+      - task: outline_and_structure
+        description: "Creazione della struttura dettagliata del white paper e definizione delle sezioni chiave"
+        complexity: "medium"
+        provider_preference: "openai"
+
+      - task: content_development
+        description: "Sviluppo dei contenuti principali di ciascuna sezione del white paper"
+        complexity: "high"
+        provider_preference: "anthropic"
+
+      - task: expert_review_and_edit
+        description: "Revisione tecnica e ottimizzazione del contenuto per coerenza e qualità"
+        complexity: "high"
+        provider_preference: "openai"
+
+      - task: visual_planning_and_finalize
+        description: "Pianificazione degli elementi visivi e finalizzazione del documento con note per il designer"
+        complexity: "high"
+        provider_preference: "anthropic"
