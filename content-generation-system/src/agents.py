@@ -55,7 +55,7 @@ class AgentsFactory:
         openai_api_key = self.config.get('openai_api_key', OPENAI_API_KEY) if self.config else OPENAI_API_KEY
 
         # Verifica se è attiva la modalità economica
-        
+
 
         # Se è attiva la modalità economica, usa DeepSeek come provider principale
         if use_economic_mode and provider_preference == "deepseek":
