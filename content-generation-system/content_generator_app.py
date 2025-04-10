@@ -162,11 +162,32 @@ with st.form("generation_form"):
         # Selezione workflow
         if config_file:
             try:
+                # Prima tenta di caricare il file specificato
                 with open(config_file, 'r') as f:
                     config_data = yaml.safe_load(f)
+                
+                # Se non ci sono workflow, prova a cercare specificamente il file workflows.yaml
                 if not config_data or 'workflows' not in config_data:
-                    st.error(f"Il file di configurazione '{config_file}' non contiene una sezione 'workflows' valida.")
-                    st.info("Controlla il file per assicurarti che abbia il formato corretto.")
+                    # Cerca in directory locale e in config/
+                    workflow_files = [
+                        os.path.join(os.path.dirname(config_file), "workflows.yaml"),
+                        os.path.join(base_dir, "config", "workflows.yaml"),
+                        os.path.join(base_dir, "workflows.yaml")
+                    ]
+                    
+                    for wf_file in workflow_files:
+                        if os.path.exists(wf_file):
+                            st.info(f"Tentativo di caricamento workflow da: {wf_file}")
+                            with open(wf_file, 'r') as wf:
+                                config_data = yaml.safe_load(wf)
+                            if config_data and 'workflows' in config_data:
+                                st.success(f"Trovati workflow in: {wf_file}")
+                                break
+                
+                # Verifica finale
+                if not config_data or 'workflows' not in config_data:
+                    st.error("Nessuna definizione di workflow trovata nei file di configurazione.")
+                    st.info("Assicurati che il file config/workflows.yaml esista e contenga una sezione 'workflows' valida.")
                     workflows = []
                 else:
                     workflows = list(config_data.get('workflows', {}).keys())
