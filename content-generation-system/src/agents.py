@@ -112,7 +112,8 @@ class AgentsFactory:
                     model_name=LLM_MODELS['deepseek']['default'],
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
-                )
+                ),
+                tools=None
             )
         else:
             # Usa OpenAI per Content Architect (comportamento predefinito)
@@ -126,7 +127,8 @@ class AgentsFactory:
                     temperature=temperature,
                     model_name=model_name,
                     api_key=openai_api_key
-                )
+                ),
+                tools=None
             )
 
         # 3. Section Writer
@@ -143,7 +145,8 @@ class AgentsFactory:
                     model_name=LLM_MODELS['deepseek']['default'],
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
-                )
+                ),
+                tools=None
             )
         else:
             # Usa Anthropic per Section Writer (comportamento predefinito)
@@ -157,7 +160,8 @@ class AgentsFactory:
                     temperature=temperature,
                     model_name=LLM_MODELS['anthropic']['default'],
                     api_key=ANTHROPIC_API_KEY
-                )
+                ),
+                tools=None
             )
 
         # 4. Copywriter
@@ -174,7 +178,8 @@ class AgentsFactory:
                     model_name=LLM_MODELS['deepseek']['default'],
                     openai_api_key=os.getenv('DEEPSEEK_API_KEY'),
                     openai_api_base="https://api.deepseek.com/v1"
-                )
+                ),
+                tools=None
             )
         else:
             # Usa Anthropic per Copywriter (comportamento predefinito)
@@ -188,7 +193,8 @@ class AgentsFactory:
                     temperature=temperature,
                     model_name=LLM_MODELS['anthropic']['default'],
                     api_key=ANTHROPIC_API_KEY
-                )
+                ),
+                tools=None
             )
 
         # 5. Editor
