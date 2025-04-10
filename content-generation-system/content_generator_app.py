@@ -133,9 +133,12 @@ with st.sidebar:
                 index=0
             )
 
-        show_logs = st.checkbox("Mostra logs", value=False, help="Visualizza log durante la generazione")
+        show_logs = st.checkbox("Mostra logs", value=True, help="Visualizza log durante la generazione")
         save_to_file = st.checkbox("Salva su file", value=True, help="Salva il contenuto generato su file")
         output_dir = st.text_input("Directory di output", value="./output", help="Directory dove salvare i file generati")
+        
+        # Aggiungi opzione per log dettagliati
+        detailed_logs = st.checkbox("Log dettagliati agenti", value=True, help="Mostra comunicazioni dettagliate tra gli agenti")
 
     # Modalità economica con DeepSeek
     use_deepseek_mode = st.checkbox("Modalità economica (DeepSeek)", value=False, help="Utilizza DeepSeek come provider principale per ridurre i costi")
@@ -267,9 +270,12 @@ if generate_button:
                 crew_config = {
                     'agents': list(agents.values()),
                     'tasks': tasks,
-                    'verbose': 2 if show_logs else 1,
+                    'verbose': 2 if show_logs or detailed_logs else 1,
                     'process': Process.hierarchical if use_parallel else Process.sequential
                 }
+                
+                if detailed_logs:
+                    st.info("🔍 Modalità log dettagliati attivata: vedrai tutte le comunicazioni tra gli agenti")
 
                 # Add manager_llm when using hierarchical process
                 if use_parallel:
@@ -284,6 +290,37 @@ if generate_button:
                 # Mostra progress bar
                 progress_bar = st.progress(0)
                 status_text = st.empty()
+                
+                # Area per visualizzare i log dettagliati
+                if detailed_logs:
+                    st.subheader("📋 Log dettagliati comunicazioni agenti")
+                    log_area = st.empty()
+                    
+                    # Configura handler per visualizzare log in Streamlit
+                    class StreamlitLogHandler(logging.Handler):
+                        def __init__(self, log_area):
+                            super().__init__()
+                            self.log_area = log_area
+                            self.log_buffer = []
+                            
+                        def emit(self, record):
+                            log_entry = self.format(record)
+                            self.log_buffer.append(log_entry)
+                            # Mantieni solo gli ultimi 100 log per evitare sovraccarichi
+                            if len(self.log_buffer) > 100:
+                                self.log_buffer = self.log_buffer[-100:]
+                            self.log_area.code("\n".join(self.log_buffer))
+                    
+                    # Aggiungi handler per Streamlit
+                    streamlit_handler = StreamlitLogHandler(log_area)
+                    streamlit_handler.setLevel(logging.INFO)
+                    streamlit_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+                    logger.addHandler(streamlit_handler)
+                    
+                    # Configura anche i logger delle librerie utilizzate
+                    for lib_logger in ["crewai", "langchain"]:
+                        logging.getLogger(lib_logger).setLevel(logging.INFO)
+                        logging.getLogger(lib_logger).addHandler(streamlit_handler)
 
                 # Funzione per aggiornare lo stato (simulato perché CrewAI non fornisce callback di progresso)
                 def update_progress():
