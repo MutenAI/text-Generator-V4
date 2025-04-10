@@ -6,7 +6,7 @@ import json
 from typing import Optional, Dict, Any
 from requests.exceptions import RequestException, HTTPError, ConnectionError, Timeout
 from json.decoder import JSONDecodeError
-from langchain.tools import Tool
+from langchain.tools import BaseTool, Tool
 from .config import SERPER_API_KEY
 
 # Configurazione logging
