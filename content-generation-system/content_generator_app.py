@@ -154,17 +154,14 @@ with st.form("generation_form"):
 
     with col2:
         # Selezione workflow
-        workflow_types = {
-            "standard": "Articolo Standard (800-1000 parole)",
-            "extended_article": "Articolo Esteso (1500+ parole)",
-            "whitepaper": "White Paper (3000+ parole)",
-            "social_content": "Social Media Content Pack"
+        content_types = {
+            "standard": "Articolo Standard (800-1000 parole)"
         }
 
         content_type = st.selectbox(
             "Tipo di contenuto",
-            options=list(workflow_types.keys()),
-            format_func=lambda x: workflow_types[x],
+            options=list(content_types.keys()),
+            format_func=lambda x: content_types[x],
             help="Seleziona il tipo di contenuto da generare"
         )
 
@@ -246,7 +243,7 @@ if generate_button:
                     st.stop()
 
                 workflow_steps = config.workflows[content_type]['steps']
-                st.write(f"📋 Workflow selezionato: {workflow_types[content_type]}")
+                st.write(f"📋 Workflow selezionato: {content_types[content_type]}")
                 st.write(f"🔄 Passi da eseguire: {len(workflow_steps)}")
 
                 # Mostra i passi del workflow
@@ -343,7 +340,7 @@ if generate_button:
             with tab2:
                 st.markdown("## Dettagli di Generazione")
                 st.write(f"**Topic:** {topic}")
-                st.write(f"**Tipo di contenuto:** {workflow_types[content_type]}")
+                st.write(f"**Tipo di contenuto:** {content_types[content_type]}")
                 st.write(f"**Reference file:** {reference_file or 'Nessuno'}")
                 st.write(f"**Numero di task:** {len(tasks)}")
                 st.write(f"**Tempo di esecuzione:** {execution_time:.2f} secondi")
@@ -385,9 +382,6 @@ with st.expander("ℹ️ Informazioni sul sistema"):
 
     **Workflow disponibili:**
     - **Articolo Standard**: 800-1000 parole, struttura base con introduzione, 2-3 sezioni e conclusione
-    - **Articolo Esteso**: 1500+ parole, più approfondito con 4 sezioni principali
-    - **White Paper**: 3000+ parole, documento professionale con executive summary, analisi approfondita e case studies
-    - **Social Media Pack**: Set di contenuti ottimizzati per diverse piattaforme social
 
     **Agenti specializzati:**
     - Web Searcher: Ricerca informazioni aggiornate
