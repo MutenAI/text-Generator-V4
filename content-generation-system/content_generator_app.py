@@ -163,13 +163,23 @@ with st.form("generation_form"):
                 'whitepaper': 'White Paper (3000+ parole)'
             }
 
-            # Crea una lista di opzioni in formato leggibile
-            workflow_options = [workflow_labels.get(w, w.replace('_', ' ').title()) for w in workflows]
-            selected_display = st.selectbox("Tipo di contenuto", workflow_options)
+            # Verifico che ci siano workflow disponibili
+            if not workflows:
+                st.error("Nessun workflow disponibile nel file di configurazione.")
+                selected_workflow = None
+            else:
+                # Crea una lista di opzioni in formato leggibile
+                workflow_options = [workflow_labels.get(w, w.replace('_', ' ').title()) for w in workflows]
+                selected_display = st.selectbox("Tipo di contenuto", workflow_options)
 
-            # Mappa l'opzione selezionata al nome originale del workflow
-            reverse_mapping = {v: k for k, v in workflow_labels.items()}
-            selected_workflow = reverse_mapping.get(selected_display, workflows[workflow_options.index(selected_display)])
+                # Mappa l'opzione selezionata al nome originale del workflow
+                reverse_mapping = {v: k for k, v in workflow_labels.items()}
+                if selected_display in reverse_mapping:
+                    selected_workflow = reverse_mapping[selected_display]
+                elif workflow_options and selected_display in workflow_options:
+                    selected_workflow = workflows[workflow_options.index(selected_display)]
+                else:
+                    selected_workflow = workflows[0] if workflows else None
         else:
             selected_workflow = None
 
@@ -185,7 +195,7 @@ with st.form("generation_form"):
         os.environ['ECONOMIC_MODE'] = 'false'
 
     # Pulsante di generazione
-    generate_button = st.form_submit_button("🚀 Genera Contenuto")
+    generate_button = st.form_submit_button(label="🚀 Genera Contenuto")
 
 # Gestione della generazione del contenuto
 if generate_button:
