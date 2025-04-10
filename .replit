@@ -3,7 +3,7 @@ modules = ["python-3.11"]
 channel = "stable-24_05"
 
 [workflows]
-runButton = "Run"
+runButton = "Fix Port"
 
 [[workflows.workflow]]
 name = "Run"
@@ -40,6 +40,15 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd content-generation-system && ECONOMIC_MODE=false python -m streamlit run content_generator_app.py --server.headless=true --server.enableCORS=false --server.enableWebsocketCompression=false --server.address=0.0.0.0"
+
+[[workflows.workflow]]
+name = "Fix Port"
+author = 40784344
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd content-generation-system && python -m streamlit run content_generator_app.py --server.port=8501 --server.headless=true --server.enableCORS=false --server.enableWebsocketCompression=false --server.address=0.0.0.0"
 
 [[ports]]
 localPort = 8080
