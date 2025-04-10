@@ -17,7 +17,7 @@ from src.agents import AgentsFactory
 from src.tasks import WorkflowManager
 from src.quality import ContentQualityChecker
 from src.config import SERPER_API_KEY
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from src.config import SERPER_API_KEY, LLM_MODELS, OPENAI_API_KEY
 
 # Importa CrewAI
