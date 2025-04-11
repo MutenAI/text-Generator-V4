@@ -3,36 +3,114 @@
 
 workflows:
   standard:
+    name: "Articolo Standard"
+    description: "Contenuto informativo di 800-1000 parole ottimizzato per engagement e conversione"
+    output_length: "800-1000 parole"
     steps:
       - task: research_and_outline
-        description: "Ricerca informazioni e creazione della struttura del contenuto"
+        description: "Ricerca informazioni e creazione struttura"
+        instructions: |
+          1. Effettuare ricerche utilizzando fonti autorevoli e recenti
+          2. Identificare 3-5 punti chiave supportati da dati concreti
+          3. Strutturare un outline con introduzione, 2-3 sezioni principali e conclusione
+          4. Definire hook iniziale e call-to-action finale
+        provider_preference: "openai"
+        complexity: "medium"
+        
       - task: draft_and_edit
-        description: "Scrittura e ottimizzazione del contenuto"
+        description: "Scrittura e ottimizzazione contenuto"
+        instructions: |
+          1. Seguire struttura definita mantenendo proporzioni tra sezioni
+          2. Utilizzare linguaggio accessibile con terminologia di settore appropriata
+          3. Inserire elementi di engagement (domande, esempi concreti)
+          4. Ottimizzare per SEO con keyword principali
+          5. Verificare lunghezza (800-1000 parole)
+        provider_preference: "anthropic"
+        complexity: "medium"
+        
       - task: review_and_finalize
-        description: "Revisione finale e formattazione del contenuto"
+        description: "Revisione finale e formattazione"
+        instructions: |
+          1. OBBLIGATORIO: Estrarre linee guida dal file di riferimento
+          2. Verificare allineamento con voice e tone del brand
+          3. Controllare accuratezza fattuale e citazioni
+          4. Ottimizzare formattazione e leggibilità
+          5. Verificare lunghezza finale e aderenza alle specifiche
+        provider_preference: "openai"
+        complexity: "high"
+        requires_reference_file: true
+        
   whitepaper:
+    name: "White Paper"
+    description: "Documento approfondito di 2000+ parole con analisi dettagliata e soluzioni"
+    output_length: "2000+ parole"
     steps:
       - task: research_and_analysis
-        description: "Ricerca approfondita sul mercato e analisi delle esigenze specifiche del settore target"
+        description: "Ricerca approfondita e analisi di mercato"
+        instructions: |
+          1. Condurre ricerca estesa su fonti primarie e secondarie
+          2. Analizzare trend di mercato, statistiche e opinioni di esperti
+          3. Identificare problematiche specifiche del settore e punti critici
+          4. Raccogliere dati quantitativi e qualitativi a supporto
+          5. Verificare l'autorevolezza delle fonti e l'attualità dei dati
+        provider_preference: "openai"
         complexity: "high"
-        provider_preference: "anthropic"
-      
+        
       - task: outline_and_structure
-        description: "Creazione della struttura dettagliata del white paper (minimo 2000 parole) e definizione delle sezioni chiave"
+        description: "Strutturazione dettagliata del documento"
+        instructions: |
+          1. Progettare struttura con tutte le sezioni obbligatorie:
+             - Executive summary (200-300 parole)
+             - Introduzione (300-400 parole)
+             - Analisi del contesto (400-500 parole)
+             - Soluzione proposta (400-500 parole)
+             - Considerazioni implementative (300-400 parole)
+             - Casi studio (300-400 parole)
+             - Prospettive future (200-300 parole)
+             - Conclusione (200-300 parole)
+          2. Definire argomenti e punti chiave per ogni sezione
+          3. Bilanciare contenuto tra problemi e soluzioni
+          4. Pianificare inserimento di dati e citazioni
+        provider_preference: "anthropic"
         complexity: "medium"
-        provider_preference: "openai"
-      
+        
       - task: content_development
-        description: "Sviluppo dei contenuti principali di ciascuna sezione del white paper (minimo 2000 parole effettive, esclusi elementi visivi)"
-        complexity: "high"
+        description: "Sviluppo contenuti completi"
+        instructions: |
+          1. Sviluppare ogni sezione seguendo la struttura definita
+          2. Mantenere tono autorevole e professionale
+          3. Bilanciare contenuto tecnico e accessibilità
+          4. Incorporare dati, statistiche e citazioni di esperti
+          5. Garantire coerenza e fluidità tra le sezioni
+          6. Verificare il conteggio parole (MINIMO 2000 effettive)
         provider_preference: "anthropic"
-      
+        complexity: "high"
+        
       - task: expert_review_and_edit
-        description: "Revisione tecnica e ottimizzazione del contenuto per coerenza e qualità, mantenendo almeno 2000 parole"
-        complexity: "high"
+        description: "Revisione tecnica e ottimizzazione"
+        instructions: |
+          1. OBBLIGATORIO: Estrarre linee guida dal file di riferimento
+          2. Verificare accuratezza tecnica e fattuale
+          3. Controllare coerenza argomentativa e logica
+          4. Allineare contenuto con voice e tone del brand
+          5. Ottimizzare linguaggio e struttura generale
+          6. Verificare conteggio parole effettivo (minimo 2000)
         provider_preference: "openai"
-      
-      - task: visual_planning_and_finalize
-        description: "Pianificazione degli elementi visivi e finalizzazione del documento con note per il designer, verifica requisito minimo 2000 parole"
         complexity: "high"
-        provider_preference: "anthropic"
+        requires_reference_file: true
+        
+      - task: visual_planning_and_finalize
+        description: "Pianificazione visiva e finalizzazione"
+        instructions: |
+          1. OBBLIGATORIO: Verificare allineamento brand con markdown_reference
+          2. Identificare opportunità per elementi visivi:
+             - Grafici per dati quantitativi
+             - Diagrammi per processi
+             - Infografiche per concetti complessi
+             - Tabelle comparative
+          3. Creare segnaposto visivi dettagliati: [VISUAL: Tipo - Descrizione dettagliata]
+          4. Aggiungere sezione "Note di Design" con specifiche tecniche
+          5. Verificare conteggio parole finale (minimo 2000, esclusi elementi visivi)
+        provider_preference: "openai"
+        complexity: "high"
+        requires_reference_file: true

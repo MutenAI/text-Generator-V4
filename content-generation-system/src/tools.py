@@ -174,7 +174,7 @@ class MarkdownParserTool:
             if not hasattr(self, 'file_exists') or not self.file_exists:
                 logger.warning("File markdown non disponibile o non trovato")
                 return handle_markdown_error("File markdown non disponibile", section or "ALL")
-                
+
             print(f"\nLeggendo file markdown: {self.file_path}")
             print(f"Sezione richiesta: {section if section else 'intero documento'}")
 
@@ -360,3 +360,155 @@ class MarkdownReferenceTool:
                 return get_content_function(section)
 
         return MarkdownReferenceCrewAITool()
+
+from .utils import handle_markdown_error
+
+class MarkdownParserTool(Tool):
+    """
+    Strumento che consente di analizzare file markdown e estrarre sezioni.
+    """
+
+    def __init__(self, reference_file=None, logger=None):
+        """
+        Inizializza lo strumento di parsing markdown.
+
+        Args:
+            reference_file: Percorso al file markdown di riferimento
+            logger: Logger opzionale
+        """
+        super().__init__(
+            name="markdown_reference",
+            description="Accede a una sezione specifica del file markdown di riferimento. "+
+                       "Fornisci il nome della sezione (ad es. 'Brand Voice') per estrarre il contenuto corrispondente. "+
+                       "Se la sezione non è trovata, verranno tentate sezioni alternative come fallback.",
+            func=self._extract_markdown_section,
+            logger=logger
+        )
+        self.reference_file = reference_file
+
+        # Importa eventuali utilità aggiuntive
+        try:
+            from .utils import handle_markdown_reference
+            self.handle_markdown_reference = handle_markdown_reference
+        except ImportError:
+            self.handle_markdown_reference = None
+
+    def _extract_markdown_section(self, params):
+        """
+        Estrae una sezione specifica da un file markdown con gestione avanzata degli errori.
+
+        Args:
+            params: Dizionario con 'section' come chiave per specificare la sezione da estrarre
+
+        Returns:
+            Il contenuto della sezione specificata
+        """
+        section_name = params.get('section')
+
+        # Se è disponibile l'helper avanzato di gestione markdown e il parametro section
+        # non è specificato, usa l'helper per una gestione più robusta
+        if not section_name and self.handle_markdown_reference:
+            try:
+                # Tenta di leggere l'intero file come fallback
+                with open(self.reference_file, 'r', encoding='utf-8') as file:
+                    content = file.read()
+                    if self.logger:
+                        self.logger.info(f"Letto intero file markdown di {len(content)} caratteri")
+                    print(f"Leggendo file markdown completo: {self.reference_file}")
+                    return content
+            except Exception as e:
+                if self.logger:
+                    self.logger.error(f"Errore nella lettura completa del file: {str(e)}")
+                raise ValueError(f"Errore nella lettura completa del file: {str(e)}")
+
+        # Se è richiesta una sezione specifica
+        if not section_name:
+            raise ValueError("È necessario specificare una sezione da estrarre")
+
+        if not self.reference_file:
+            if self.logger:
+                self.logger.error("File di riferimento non specificato")
+            raise ValueError("File di riferimento non specificato")
+
+        try:
+            with open(self.reference_file, 'r', encoding='utf-8') as file:
+                content = file.read()
+                if self.logger:
+                    self.logger.info(f"Letto file markdown di {len(content)} caratteri")
+
+                # Cerca sezioni di livello 1 e 2 (# e ##)
+                section_patterns = [
+                    # Sezione di livello 1
+                    r'# ' + re.escape(section_name) + r'\s*\n(.*?)(?:\n# |\Z)',
+                    # Sezione di livello 2
+                    r'## ' + re.escape(section_name) + r'\s*\n(.*?)(?:\n## |\n# |\Z)'
+                ]
+
+                for pattern in section_patterns:
+                    match = re.search(pattern, content, re.DOTALL)
+                    if match:
+                        section_content = match.group(1).strip()
+                        if self.logger:
+                            self.logger.info(f"Trovata sezione '{section_name}' di livello {section_patterns.index(pattern) + 1}")
+
+                        # Stampa a riga di comando per debug
+                        print(f"Leggendo file markdown: {self.reference_file}")
+                        print(f"Sezione richiesta: {section_name}")
+
+                        return section_content
+
+                # Se non troviamo la sezione con il pattern specifico, 
+                # cerchiamo in modo più flessibile
+                headers = re.findall(r'(#+)\s+(.*?)\s*\n', content)
+                for header_level, header_text in headers:
+                    if section_name.lower() in header_text.lower():
+                        # Trovato un'intestazione che contiene il nome della sezione
+                        header_pattern = re.escape(header_level) + r'\s+' + re.escape(header_text) + r'\s*\n(.*?)(?:\n' + re.escape(header_level[0]) + r'{1,' + str(len(header_level)) + r'}\s+|\Z)'
+                        match = re.search(header_pattern, content, re.DOTALL)
+                        if match:
+                            section_content = match.group(1).strip()
+                            if self.logger:
+                                self.logger.info(f"Trovata sezione simile a '{section_name}': '{header_text}'")
+                            return section_content
+
+                # Se ancora non troviamo nulla, tentiamo un approccio più flessibile cercando contenuti rilevanti
+                # Questo è utile quando le sezioni non hanno esattamente il nome richiesto
+                section_keywords = section_name.lower().split()
+                potential_sections = []
+
+                for header_level, header_text in headers:
+                    header_keywords = header_text.lower().split()
+                    # Calcola quante parole chiave corrispondono
+                    matches = sum(1 for keyword in section_keywords if keyword in header_keywords)
+                    if matches > 0:
+                        relevance = matches / len(section_keywords)
+                        # Se la rilevanza è sufficiente, aggiungi alla lista dei potenziali
+                        if relevance >= 0.5:  # Almeno metà delle parole chiave devono corrispondere
+                            header_pattern = re.escape(header_level) + r'\s+' + re.escape(header_text) + r'\s*\n(.*?)(?:\n' + re.escape(header_level[0]) + r'{1,' + str(len(header_level)) + r'}\s+|\Z)'
+                            match = re.search(header_pattern, content, re.DOTALL)
+                            if match:
+                                section_content = match.group(1).strip()
+                                potential_sections.append((relevance, header_text, section_content))
+
+                # Se abbiamo trovato sezioni potenzialmente rilevanti, restituisci la più rilevante
+                if potential_sections:
+                    # Ordina per rilevanza (decrescente)
+                    potential_sections.sort(reverse=True)
+                    best_match = potential_sections[0]
+                    if self.logger:
+                        self.logger.info(f"Utilizzata sezione alternativa '{best_match[1]}' con rilevanza {best_match[0]:.2f}")
+                    return best_match[2]
+
+                # Se ancora non troviamo nulla, restituiamo un errore
+                if self.logger:
+                    self.logger.warning(f"Sezione '{section_name}' non trovata nel file markdown")
+                raise ValueError(f"Sezione '{section_name}' non trovata nel file markdown")
+
+        except FileNotFoundError:
+            if self.logger:
+                self.logger.error(f"File di riferimento non trovato: {self.reference_file}")
+            raise ValueError(f"File di riferimento non trovato: {self.reference_file}")
+        except Exception as e:
+            if self.logger:
+                self.logger.error(f"Errore nell'analisi del file markdown: {str(e)}")
+            raise ValueError(f"Errore nell'analisi del file markdown: {str(e)}")
