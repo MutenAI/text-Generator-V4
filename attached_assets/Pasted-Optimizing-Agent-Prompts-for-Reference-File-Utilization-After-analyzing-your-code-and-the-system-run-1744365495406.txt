@@ -1,0 +1,101 @@
+Optimizing Agent Prompts for Reference File Utilization
+After analyzing your code and the system runs, I can see there are opportunities to improve how your agents utilize the markdown reference files. Here are my recommendations for each agent type:
+1. Content Editor and Brand Aligner Agent
+This agent shows the most issues with markdown reference file usage. Let's optimize its prompts:
+Current Issues:
+
+Inconsistent reference file access
+Errors with markdown tool arguments
+Lack of clear instruction for fallback strategies
+
+Improved Backstory:
+pythonbackstory="You are an expert editor who ensures content aligns perfectly with brand guidelines. Your PRIMARY responsibility is to ALWAYS check the reference markdown files using the markdown_tool before making any edits. These files contain critical brand voice, style guides, and terminology preferences that must be followed precisely. When accessing reference files, always specify the exact section needed (e.g., 'Brand Voice', 'Style Guide') and have backup sections to try if the first fails. Always incorporate specific guidance from these files in your edits and cite them explicitly in your reasoning."
+Improved Task Description:
+pythondescription="""Review and finalize the article about '{topic}' following these steps:
+
+1. FIRST STEP - MANDATORY: Use the markdown_tool to extract brand guidelines by running these commands in sequence:
+   - Try: markdown_reference({"section": "Brand Voice"})
+   - If that fails, try: markdown_reference({"section": "Style Guide"})
+   - If both fail, try: markdown_reference({"section": "ALL"}) or markdown_reference with no arguments
+   
+2. Review and optimize the content based on:
+   - Direct alignment with brand voice elements found in step 1
+   - [other criteria...]
+   
+If you encounter ANY errors with the markdown_tool, REPORT the specific error message and continue with your best judgment of professional editing standards."""
+2. Quality Reviewer Agent
+This agent should also utilize reference files but appears to have similar issues.
+Improved Backstory:
+pythonbackstory="You are a meticulous quality control specialist who ensures all content meets the highest standards before publication. You ALWAYS verify content against official brand guidelines stored in reference markdown files. Your process includes systematically checking voice, terminology, structure, and formatting requirements from these references and providing specific citations when identifying issues."
+Improved Task Description:
+pythondescription="""Conduct a thorough quality review of '{topic}' content by:
+
+1. REQUIRED FIRST STEP: Access reference files using markdown_tool:
+   - markdown_reference({"section": "Content Structure"})
+   - markdown_reference({"section": "Terminology Preferences"})
+   
+2. Create a structured evaluation with explicit references to guidelines from step 1
+3. [other steps...]"""
+3. Tool Access Strategy
+For both agents that use the markdown tool, update the tool access pattern:
+python# Improved tool usage in the agent's workflow
+tools=[
+    Tool(
+        name="markdown_reference",
+        description="Get content from the reference markdown file. Optionally specify a section name to get only that part.",
+        func=markdown_tool.get_content,
+        return_direct=False,
+        args_schema=MarkdownReferenceSchema,
+        handle_tool_error=lambda error: f"Error accessing reference file: {error}. Proceed using general professional writing standards."
+    )
+]
+4. Error Handling Implementation
+Add explicit error handling for the markdown tool:
+pythondef handle_markdown_error(error, section_name):
+    """Handle errors when accessing markdown reference files."""
+    fallback_sections = ["ALL", "Style Guide", "Brand Voice", "Content Structure", "Writing Guidelines"]
+    
+    # Remove the section that failed
+    if section_name in fallback_sections:
+        fallback_sections.remove(section_name)
+    
+    # Return structured response with fallback guidance
+    return {
+        "error": str(error),
+        "message": f"Could not access '{section_name}' section. Try these sections instead: {', '.join(fallback_sections)}",
+        "fallback_guidance": "When reference files cannot be accessed, follow these general principles: use professional tone, avoid jargon, structure content with clear headings, and keep paragraphs concise (3-4 sentences)."
+    }
+5. Explicit Reference Usage Instructions
+Add these instructions to any task that should use reference files:
+CRITICAL REQUIREMENT: Throughout your work, you MUST explicitly cite guidance from the reference files. Format your citations as:
+
+"According to the brand guidelines: [direct quote from reference file]"
+
+If you cannot access the reference files, explicitly state: "Reference files could not be accessed. Proceeding with standard professional guidelines."
+6. Implementation Recommendations
+
+Section Specification: Always provide a default section name when using the markdown_reference tool
+Error Recovery: Implement multi-attempt patterns with different section names
+Validation: Add a validation step for reference file content to confirm it was properly received
+Feedback Loop: Have agents report when reference files are missing or incomplete
+
+Example Improved Task Implementation
+pythoneditor_task = Task(
+    description=f"""Review and finalize the article about '{topic}' following these MANDATORY steps:
+
+1. FIRST ACTION REQUIRED: Extract brand guidelines using the markdown_reference tool:
+   - Command to use: markdown_reference({{"section": "Brand Voice"}})
+   - If you receive ANY error, try: markdown_reference({{"section": "Style Guide"}})
+   - If both fail, try without section specification
+   
+2. After successful extraction, EXPLICITLY CITE the guidelines in your reasoning:
+   Example: "According to brand guidelines, I'm using an authoritative tone by..."
+   
+3. If ALL extraction attempts fail, state clearly: "Unable to access reference files. Using professional standards instead."
+
+4. Complete the rest of your editing process, ensuring EVERY edit aligns with guidelines.
+
+Your output MUST be the complete, publication-ready article with explicit references to how you applied the brand guidelines.""",
+    expected_output="A publication-ready article that explicitly follows the brand guidelines from the reference file.",
+    agent=self.agents["editor"],
+    async_execution=False
