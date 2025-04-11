@@ -1,0 +1,373 @@
+develop enhanced guidelines and best practices for your content generation system, focusing on improving task descriptions and creating clearer instructions for agents.
+1. Improved Workflow Configurations
+Standard Article Workflow
+yamlworkflows:
+  standard:
+    name: "Articolo Standard"
+    description: "Contenuto informativo di 800-1000 parole ottimizzato per engagement e conversione"
+    output_length: "800-1000 parole"
+    steps:
+      - task: research_and_outline
+        description: "Ricerca informazioni e creazione struttura"
+        instructions: |
+          1. Effettuare ricerche utilizzando fonti autorevoli e recenti
+          2. Identificare 3-5 punti chiave supportati da dati concreti
+          3. Strutturare un outline con introduzione, 2-3 sezioni principali e conclusione
+          4. Definire hook iniziale e call-to-action finale
+        provider_preference: "openai"
+        complexity: "medium"
+        
+      - task: draft_and_edit
+        description: "Scrittura e ottimizzazione contenuto"
+        instructions: |
+          1. Seguire struttura definita mantenendo proporzioni tra sezioni
+          2. Utilizzare linguaggio accessibile con terminologia di settore appropriata
+          3. Inserire elementi di engagement (domande, esempi concreti)
+          4. Ottimizzare per SEO con keyword principali
+          5. Verificare lunghezza (800-1000 parole)
+        provider_preference: "anthropic"
+        complexity: "medium"
+        
+      - task: review_and_finalize
+        description: "Revisione finale e formattazione"
+        instructions: |
+          1. OBBLIGATORIO: Estrarre linee guida dal file di riferimento
+          2. Verificare allineamento con voice e tone del brand
+          3. Controllare accuratezza fattuale e citazioni
+          4. Ottimizzare formattazione e leggibilità
+          5. Verificare lunghezza finale e aderenza alle specifiche
+        provider_preference: "openai"
+        complexity: "high"
+        requires_reference_file: true
+Whitepaper Workflow
+yamlworkflows:
+  whitepaper:
+    name: "White Paper"
+    description: "Documento approfondito di 2000+ parole con analisi dettagliata e soluzioni"
+    output_length: "2000+ parole"
+    steps:
+      - task: research_and_analysis
+        description: "Ricerca approfondita e analisi di mercato"
+        instructions: |
+          1. Condurre ricerca estesa su fonti primarie e secondarie
+          2. Analizzare trend di mercato, statistiche e opinioni di esperti
+          3. Identificare problematiche specifiche del settore e punti critici
+          4. Raccogliere dati quantitativi e qualitativi a supporto
+          5. Verificare l'autorevolezza delle fonti e l'attualità dei dati
+        provider_preference: "openai"
+        complexity: "high"
+        
+      - task: outline_and_structure
+        description: "Strutturazione dettagliata del documento"
+        instructions: |
+          1. Progettare struttura con tutte le sezioni obbligatorie:
+             - Executive summary (200-300 parole)
+             - Introduzione (300-400 parole)
+             - Analisi del contesto (400-500 parole)
+             - Soluzione proposta (400-500 parole)
+             - Considerazioni implementative (300-400 parole)
+             - Casi studio (300-400 parole)
+             - Prospettive future (200-300 parole)
+             - Conclusione (200-300 parole)
+          2. Definire argomenti e punti chiave per ogni sezione
+          3. Bilanciare contenuto tra problemi e soluzioni
+          4. Pianificare inserimento di dati e citazioni
+        provider_preference: "anthropic"
+        complexity: "medium"
+        
+      - task: content_development
+        description: "Sviluppo contenuti completi"
+        instructions: |
+          1. Sviluppare ogni sezione seguendo la struttura definita
+          2. Mantenere tono autorevole e professionale
+          3. Bilanciare contenuto tecnico e accessibilità
+          4. Incorporare dati, statistiche e citazioni di esperti
+          5. Garantire coerenza e fluidità tra le sezioni
+          6. Verificare il conteggio parole (MINIMO 2000 effettive)
+        provider_preference: "anthropic"
+        complexity: "high"
+        
+      - task: expert_review_and_edit
+        description: "Revisione tecnica e ottimizzazione"
+        instructions: |
+          1. OBBLIGATORIO: Estrarre linee guida dal file di riferimento
+          2. Verificare accuratezza tecnica e fattuale
+          3. Controllare coerenza argomentativa e logica
+          4. Allineare contenuto con voice e tone del brand
+          5. Ottimizzare linguaggio e struttura generale
+          6. Verificare conteggio parole effettivo (minimo 2000)
+        provider_preference: "openai"
+        complexity: "high"
+        requires_reference_file: true
+        
+      - task: visual_planning_and_finalize
+        description: "Pianificazione visiva e finalizzazione"
+        instructions: |
+          1. OBBLIGATORIO: Verificare allineamento brand con markdown_reference
+          2. Identificare opportunità per elementi visivi:
+             - Grafici per dati quantitativi
+             - Diagrammi per processi
+             - Infografiche per concetti complessi
+             - Tabelle comparative
+          3. Creare segnaposto visivi dettagliati: [VISUAL: Tipo - Descrizione dettagliata]
+          4. Aggiungere sezione "Note di Design" con specifiche tecniche
+          5. Verificare conteggio parole finale (minimo 2000, esclusi elementi visivi)
+        provider_preference: "openai"
+        complexity: "high"
+        requires_reference_file: true
+2. Enhanced Task Implementation for Workflow Manager
+Here's an improved implementation for your WorkflowManager class in tasks.py:
+pythondef _create_standard_workflow(self, topic):
+    """Crea il flusso di lavoro standard ottimizzato per articoli di media lunghezza (800-1000 parole)."""
+    # Task 1: Research + Outline (Combinati)
+    research_outline_task = Task(
+        description=f"""Research and outline for topic: '{topic}'. Complete these tasks thoroughly:
+
+1. RESEARCH PHASE:
+   a) Conduct comprehensive research using authoritative sources
+   b) Gather current, accurate information with relevant statistics
+   c) Identify 3-5 key points supported by evidence
+   d) Document all sources properly for citation
+
+2. OUTLINE DEVELOPMENT:
+   a) Structure an 800-1000 word article with:
+      - Compelling introduction with hook (100-150 words)
+      - 2-3 main sections (200-300 words each)
+      - Clear conclusion with call-to-action (100-150 words)
+   b) Create logical flow between sections
+   c) Plan for data integration and examples
+   d) Define key messaging for each section
+
+Your output must include:
+1. A comprehensive research summary with key findings and sources
+2. A detailed content outline with section breakdowns and word count allocations""",
+        expected_output="A research summary and content outline for a 800-1000 word article in markdown format.",
+        agent=self.agents["web_searcher"],
+        async_execution=False
+    )
+
+    # Task 2: Content Creation + Initial Editing
+    writing_editing_task = Task(
+        description=f"""Create and optimize an article on '{topic}' following these specific guidelines:
+
+1. CONTENT CREATION:
+   a) Follow the provided outline structure precisely
+   b) Develop an engaging introduction with a strong hook (100-150 words)
+   c) Create 2-3 main sections (200-300 words each) with:
+      - Clear subheadings that incorporate key terms
+      - Concrete examples and evidence
+      - Logical transitions between paragraphs
+   d) Write a conclusion that summarizes key points and includes a clear call-to-action (100-150 words)
+
+2. WRITING STYLE REQUIREMENTS:
+   a) Professional yet conversational tone
+   b) Active voice (minimum 80% of sentences)
+   c) Varied sentence structure and length
+   d) Paragraph length of 3-5 sentences maximum
+   e) Industry-appropriate terminology explained when necessary
+   f) Engagement elements (questions, scenarios, examples)
+
+3. OPTIMIZATION:
+   a) Verify total word count (800-1000 words)
+   b) Ensure proper formatting with consistent heading hierarchy
+   c) Check all statements are factually accurate and supported
+   d) Add appropriate transitions between sections
+
+Your output must be a complete, well-structured article with all sections fully developed and ready for final review.""",
+        expected_output="A well-structured and initially optimized article of 800-1000 words in markdown format.",
+        agent=self.agents["copywriter"],
+        async_execution=False,
+        dependencies=[research_outline_task]
+    )
+
+    # Task 3: Final Review + Brand Alignment
+    review_finalize_task = Task(
+        description=f"""Review and finalize the article about '{topic}' following these MANDATORY steps:
+
+1. REFERENCE FILE ACCESS - FIRST REQUIRED STEP:
+   a) Extract brand guidelines using markdown_reference({{"section": "Brand Voice"}})
+   b) Extract style guidance using markdown_reference({{"section": "Style Guide"}})
+   c) Extract structure patterns using markdown_reference({{"section": "Content Structure"}})
+   d) Extract terminology preferences using markdown_reference({{"section": "Terminology Preferences"}})
+   
+   Document all successful and failed access attempts in your thinking.
+
+2. CONTENT REVIEW AND ALIGNMENT:
+   a) Ensure factual accuracy by comparing with research summary
+   b) Apply brand voice characteristics (document specific applications)
+   c) Implement style guide formatting requirements
+   d) Follow content structure patterns from guidelines
+   e) Use preferred terminology and avoid prohibited terms
+   f) Verify technical accuracy and clarity
+
+3. QUALITY ENHANCEMENT:
+   a) Improve transitions between sections
+   b) Enhance engagement elements
+   c) Optimize headings for clarity and SEO
+   d) Ensure consistent tone throughout
+   e) Verify logical flow and argumentation
+
+4. FINALIZATION:
+   a) Format according to markdown standards
+   b) Verify final word count (800-1000 words)
+   c) Ensure all brand guidelines have been properly applied
+
+If reference files cannot be accessed, document the specific errors encountered and proceed using professional standards.
+
+YOUR OUTPUT MUST BE THE COMPLETE, PUBLICATION-READY ARTICLE with all brand alignments implemented.""",
+        expected_output="The final, publication-ready article in markdown format, incorporating all brand guidelines.",
+        agent=self.agents["editor"],
+        async_execution=False,
+        dependencies=[writing_editing_task],
+        tools=[self.agents["editor"].tools[0]] if len(self.agents["editor"].tools) > 0 else []
+    )
+
+    # Always include the final review step for brand alignment
+    tasks = [research_outline_task, writing_editing_task, review_finalize_task]
+    return tasks
+3. Best Practices For Markdown Reference Tool Usage
+Add this specific implementation for error handling with the markdown reference tool:
+pythondef handle_markdown_reference(section_name, fallback_sections=None):
+    """
+    Handler for markdown reference tool to ensure robust access to brand guidelines.
+    
+    Args:
+        section_name: Primary section to access
+        fallback_sections: List of alternative sections to try if primary fails
+    
+    Returns:
+        Dictionary with results and any error information
+    """
+    if fallback_sections is None:
+        fallback_sections = ["Brand Voice", "Style Guide", "Content Structure", "Terminology Preferences"]
+    
+    # Remove the current section from fallbacks if present
+    if section_name in fallback_sections:
+        fallback_sections.remove(section_name)
+    
+    results = {
+        "attempts": [],
+        "successful_sections": {},
+        "failed_sections": [],
+        "fallback_recommendations": fallback_sections
+    }
+    
+    # Try to access the primary section
+    try:
+        content = markdown_reference({"section": section_name})
+        results["attempts"].append({"section": section_name, "status": "success"})
+        results["successful_sections"][section_name] = content
+    except Exception as e:
+        results["attempts"].append({"section": section_name, "status": "failed", "error": str(e)})
+        results["failed_sections"].append(section_name)
+        
+        # Try fallback sections
+        for fallback in fallback_sections:
+            try:
+                content = markdown_reference({"section": fallback})
+                results["attempts"].append({"section": fallback, "status": "success"})
+                results["successful_sections"][fallback] = content
+            except Exception as e:
+                results["attempts"].append({"section": fallback, "status": "failed", "error": str(e)})
+                results["failed_sections"].append(fallback)
+    
+    # If all sections failed, try without section specification
+    if not results["successful_sections"] and len(results["failed_sections"]) > 0:
+        try:
+            content = markdown_reference({})
+            results["attempts"].append({"section": "ALL", "status": "success"})
+            results["successful_sections"]["ALL"] = content
+        except Exception as e:
+            results["attempts"].append({"section": "ALL", "status": "failed", "error": str(e)})
+            results["failed_sections"].append("ALL")
+    
+    return results
+4. Content Quality Guidelines
+Here's a set of content quality guidelines you can include in your system documentation or as a reference file:
+markdown# Content Quality Guidelines
+
+## Standard Article (800-1000 parole)
+
+### Structure Requirements
+- **Introduction (100-150 parole)**: Hook + context + purpose
+- **Main Sections (200-300 parole each)**: 2-3 sections with logical development
+- **Conclusion (100-150 parole)**: Summary + call-to-action
+
+### Quality Metrics
+1. **Readability Score**: Flesch Reading Ease di 60-70 (accessibile al grande pubblico)
+2. **Densità keywords**: 1-2% della lunghezza totale
+3. **Engagement**: Minimo 1 domanda o esempio per sezione
+4. **Chiarezza**: Frasi di massimo 20 parole in media
+5. **Struttura**: Paragrafi di 3-5 frasi massimo
+
+### Elementi Obbligatori
+- Intestazioni H2 per sezioni principali
+- Intestazioni H3 per sottosezioni
+- Lista puntata o numerata in ogni sezione principale
+- Citazioni o dati supportati da fonti
+- Call-to-action nella conclusione
+
+## Whitepaper (2000+ parole)
+
+### Structure Requirements
+- **Executive Summary (200-300 parole)**: Panoramica completa e value proposition
+- **Introduzione (300-400 parole)**: Contesto, sfide, scopo del documento
+- **Analisi contesto (400-500 parole)**: Approfondimento del problema/mercato
+- **Soluzione proposta (400-500 parole)**: Approccio dettagliato e metodologia
+- **Implementazione (300-400 parole)**: Considerazioni pratiche e passaggi
+- **Casi studio (300-400 parole)**: Esempi concreti e risultati
+- **Prospettive future (200-300 parole)**: Tendenze e sviluppi attesi
+- **Conclusione (200-300 parole)**: Riepilogo e prossimi passi
+
+### Quality Metrics
+1. **Profondità analisi**: Minimo 3 livelli di approfondimento per argomento
+2. **Supporto empirico**: Minimo 5 dati statistici/ricerche citate
+3. **Autorevolezza**: Minimo 3 citazioni da esperti di settore
+4. **Completezza**: Copertura di almeno l'80% delle domande frequenti sul tema
+5. **Struttura**: Progressione logica con chiare transizioni tra sezioni
+
+### Elementi Obbligatori
+- Gerarchia coerente di intestazioni (H1, H2, H3, H4)
+- Almeno 3 elementi visuali (tabelle, grafici, diagrammi)
+- Glossario dei termini tecnici
+- Bibliografia o riferimenti completi
+- Pagina di riepilogo punti chiave
+5. Implementation Recommendations for Your System
+
+Enhanced Error Handling:
+
+Implement the handle_markdown_reference function to improve reference file access
+Add logging for all reference file access attempts
+Create fallback mechanisms when reference files can't be accessed
+
+
+Task Assignment Optimization:
+
+Match complex tasks to more capable models (Claude 3 Opus, GPT-4)
+Use specialized agents for specialized tasks (research vs. writing)
+Consider task chunking for longer documents
+
+
+Quality Control Implementation:
+
+Add a verification step between tasks to ensure requirements are met
+Implement better adherence checking with specific metrics
+Use NLP techniques to assess content against brand guidelines
+
+
+Configuration-Driven Workflow:
+
+Move from hardcoded task descriptions to configuration-driven approach
+Allow dynamic task creation based on template variables
+Enable conditional task paths based on content complexity
+
+
+Feedback Integration:
+
+Add a feedback mechanism from the editor to earlier agents
+Implement learning loops for continuous improvement
+Track performance metrics per agent and task type
+
+
+
+These improvements will enhance your content generation system by making it more robust, efficient, and capable of consistently producing high-quality content that follows your brand guidelines.RetryClaude can make mistakes. Please double-check responses.
