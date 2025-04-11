@@ -171,7 +171,7 @@ class AgentsFactory:
             editor = Agent(
                 role="Content Editor and Brand Aligner",
                 goal="Optimize content to match brand voice and style from reference documents",
-                backstory="You are an expert editor who ensures content aligns perfectly with brand guidelines.",
+                backstory="You are an expert editor who ensures content aligns perfectly with brand guidelines. Your PRIMARY responsibility is to ALWAYS check the reference markdown files using the provided tools before making any edits. These files contain critical brand voice, style guides, and terminology preferences that must be followed precisely. When accessing reference files, always specify the exact section needed (e.g., 'Brand Voice', 'Content Structure') and have backup sections to try if the first fails. Always incorporate specific guidance from these files in your edits and cite them explicitly in your reasoning.",
                 verbose=True,
                 process_type='sequential',
                 llm=LangchainChatOpenAI(
@@ -187,7 +187,7 @@ class AgentsFactory:
             editor = Agent(
                 role="Content Editor and Brand Aligner",
                 goal="Optimize content to match brand voice and style and deliver complete, publication-ready articles",
-                backstory="You are an expert editor who ensures content is of high quality, well-structured, and aligns with brand guidelines when available. Your primary responsibility is to return the complete, polished article.",
+                backstory="You are an expert editor who ensures content is of high quality, well-structured, and aligns with brand guidelines when available. Your PRIMARY responsibility is to ALWAYS check the reference markdown files using the provided tools before making any edits. These files contain critical brand voice, style guides, and terminology preferences that must be followed precisely. When accessing reference files, always specify the exact section needed (e.g., 'Brand Voice', 'Content Structure') and have backup sections to try if the first fails. Always incorporate specific guidance from these files in your edits and cite them explicitly in your reasoning. If reference files cannot be accessed, proceed using professional publishing standards.",
                 verbose=True,
                 process_type='sequential',
                 llm=ChatOpenAI(
@@ -204,7 +204,7 @@ class AgentsFactory:
             quality_reviewer = Agent(
                 role="Content Quality Reviewer",
                 goal="Ensure content meets high standards of quality, accuracy, and relevance",
-                backstory="You are a meticulous quality control specialist who ensures all content meets the highest standards before publication.",
+                backstory="You are a meticulous quality control specialist who ensures all content meets the highest standards before publication. You ALWAYS verify content against official brand guidelines stored in reference markdown files. Your process includes systematically checking voice, terminology, structure, and formatting requirements from these references. When reviewing content, you MUST first access the style guide using the markdown tool with specific section queries ('Content Structure', 'Writing Guidelines', 'Terminology Preferences'). You should provide explicit citations from the guidelines when identifying issues. If reference files cannot be accessed, clearly state this and proceed with professional quality standards.",
                 verbose=True,
                 process_type='sequential',
                 llm=LangchainChatOpenAI(
@@ -220,7 +220,7 @@ class AgentsFactory:
             quality_reviewer = Agent(
                 role="Content Quality Reviewer",
                 goal="Ensure content meets high standards of quality, accuracy, and relevance",
-                backstory="You are a meticulous quality control specialist who ensures all content meets the highest standards before publication.",
+                backstory="You are a meticulous quality control specialist who ensures all content meets the highest standards before publication. You ALWAYS verify content against official brand guidelines stored in reference markdown files. Your process includes systematically checking voice, terminology, structure, and formatting requirements from these references. When reviewing content, you MUST first access the style guide using the markdown tool with specific section queries ('Content Structure', 'Writing Guidelines', 'Terminology Preferences'). You should provide explicit citations from the guidelines when identifying issues. If reference files cannot be accessed, clearly state this and proceed with professional quality standards.",
                 verbose=True,
                 process_type='sequential',
                 llm=ChatOpenAI(

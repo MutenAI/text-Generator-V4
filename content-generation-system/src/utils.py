@@ -1,3 +1,19 @@
+
+def handle_markdown_error(error, section_name):
+    """Handle errors when accessing markdown reference files."""
+    fallback_sections = ["ALL", "Style Guide", "Brand Voice", "Content Structure", "Writing Guidelines", "Terminology Preferences"]
+    
+    # Remove the section that failed
+    if section_name in fallback_sections:
+        fallback_sections.remove(section_name)
+    
+    # Return structured response with fallback guidance
+    return {
+        "error": str(error),
+        "message": f"Could not access '{section_name}' section. Try these sections instead: {', '.join(fallback_sections)}",
+        "fallback_guidance": "When reference files cannot be accessed, follow these general principles: use professional tone, avoid jargon, structure content with clear headings, and keep paragraphs concise (3-4 sentences)."
+    }
+
 import os
 import re
 from datetime import datetime
