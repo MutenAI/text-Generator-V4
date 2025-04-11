@@ -159,13 +159,22 @@ class MarkdownParserTool:
     def __init__(self, file_path=None):
         self.file_path = file_path
         if not self.file_path:
-            raise ValueError("Il percorso del file markdown di riferimento non è stato specificato")
+            logger.warning("Il percorso del file markdown di riferimento non è stato specificato")
+            self.file_exists = False
+            return
         if not os.path.exists(self.file_path):
-            raise FileNotFoundError(f"File markdown non trovato: {self.file_path}")
+            logger.warning(f"File markdown non trovato: {self.file_path}")
+            self.file_exists = False
+            return
+        self.file_exists = True
 
     def get_content(self, section=None):
         """Legge il contenuto del file markdown, opzionalmente filtrando per sezione."""
         try:
+            if not hasattr(self, 'file_exists') or not self.file_exists:
+                logger.warning("File markdown non disponibile o non trovato")
+                return handle_markdown_error("File markdown non disponibile", section or "ALL")
+                
             print(f"\nLeggendo file markdown: {self.file_path}")
             print(f"Sezione richiesta: {section if section else 'intero documento'}")
 

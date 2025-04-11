@@ -11,7 +11,7 @@ def handle_markdown_error(error, section_name):
     return {
         "error": str(error),
         "message": f"Could not access '{section_name}' section. Try these sections instead: {', '.join(fallback_sections)}",
-        "fallback_guidance": "When reference files cannot be accessed, follow these general principles: use professional tone, avoid jargon, structure content with clear headings, and keep paragraphs concise (3-4 sentences)."
+        "fallback_guidance": "When reference files cannot be accessed, follow these general principles: use professional tone, avoid jargon, structure content with clear headings, and keep paragraphs concise (3-4 sentences). For professional content: maintain formal language, use industry-specific terminology appropriately, organize with logical hierarchy, and ensure factual accuracy with citations where needed."
     }
 
 import os
