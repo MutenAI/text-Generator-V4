@@ -236,15 +236,13 @@ class MarkdownParserTool:
 
         except FileNotFoundError as e:
             logger.error(f"File non trovato: {str(e)}")
-            return f"Errore: Il file markdown non è stato trovato. Verifica il percorso del file."
+            return handle_markdown_error(str(e), section)
         except UnicodeDecodeError as e:
             logger.error(f"Errore di decodifica del file: {str(e)}")
-            return "Errore: Impossibile leggere il file a causa di problemi di codifica. "  \
-                   "Il file potrebbe essere danneggiato o utilizzare una codifica non supportata."
+            return handle_markdown_error("Problemi di codifica del file", section)
         except Exception as e:
             logger.error(f"Errore imprevisto durante la lettura del file: {str(e)}", exc_info=True)
-            return f"Si è verificato un errore durante la lettura del file: {str(e)}. "  \
-                   "Per favore, verifica che il file sia accessibile e non sia danneggiato."
+            return handle_markdown_error(str(e), section)
 
     def get_tool(self):
         """Restituisce un oggetto BaseTool per l'integrazione con CrewAI."""

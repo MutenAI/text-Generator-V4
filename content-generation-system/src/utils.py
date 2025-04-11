@@ -1,7 +1,15 @@
 
 def handle_markdown_error(error, section_name):
     """Handle errors when accessing markdown reference files."""
-    fallback_sections = ["ALL", "Style Guide", "Brand Voice", "Content Structure", "Writing Guidelines", "Terminology Preferences"]
+    fallback_sections = [
+        "Brand Voice", 
+        "Style Guide", 
+        "Content Structure", 
+        "Terminology Preferences",
+        "Company Background",
+        "Product Information",
+        "Competitor Analysis"
+    ]
     
     # Remove the section that failed
     if section_name in fallback_sections:
@@ -9,9 +17,10 @@ def handle_markdown_error(error, section_name):
     
     # Return structured response with fallback guidance
     return {
-        "error": str(error),
-        "message": f"Could not access '{section_name}' section. Try these sections instead: {', '.join(fallback_sections)}",
-        "fallback_guidance": "When reference files cannot be accessed, follow these general principles: use professional tone, avoid jargon, structure content with clear headings, and keep paragraphs concise (3-4 sentences). For professional content: maintain formal language, use industry-specific terminology appropriately, organize with logical hierarchy, and ensure factual accuracy with citations where needed."
+        "status": "error",
+        "message": f"Error accessing '{section_name}' section: {str(error)}",
+        "fallback_options": fallback_sections,
+        "recommendation": "Try accessing one of the fallback sections, or proceed using professional standards if all sections are inaccessible."
     }
 
 import os
